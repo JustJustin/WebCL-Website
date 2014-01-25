@@ -24,7 +24,8 @@ module.exports = {
 		var response = "<html><head><title>Hello World!</title></head><body><h1>Hello</h1><div>"+fspath+"</body></html>";
         
 		
-		res.send( response );
+		//res.send( response );
+		return res.view({ fspath: fspath });
     },
   
     /* Override routes */
