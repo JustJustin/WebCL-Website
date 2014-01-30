@@ -1,5 +1,5 @@
 /**
- * HelloController
+ * ExController
  *
  * @module      :: Controller
  * @description	:: A set of functions called `actions`.
@@ -16,24 +16,15 @@
  */
 
 module.exports = {
-    index: function(req, res) {
-		var fs = require("fs");
-        var fspath = fs.realpathSync( "./" );
-		
-		return res.view({ fspath: fspath });
-    },
+    
   
-    /* Override routes */
-    routes: {
-    'get /hello': {
-        controller: 'hello',
-        action: 'index'
-        }
-    },
+
 
   /**
    * Overrides for the settings in `config/controllers.js`
-   * (specific to HelloController)
+   * (specific to ExController)
    */
   _config: {}
+
+  
 };
