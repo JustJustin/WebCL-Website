@@ -5,7 +5,7 @@
     "description": "a Sails application",
     "dependencies": {
         "sails": "0.9.8",
-        "grunt": "0.4.1",
+        "grunt": "0.4.2",
         "sails-disk": "~0.9.0",
         "ejs": "0.8.4",
         "optimist": "0.3.4"
