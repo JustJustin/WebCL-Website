@@ -1,0 +1,26 @@
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+.greyLight{
+    background-color: #232323;
+}
+.greyDark{
+    background-color: #222222;
+}
+
+.pageHeader{
+    background-color: #232323;
+    display: block;
+    height: 80px;
+    width: 100%;
+}
+
+.pageTitle {
+    color: #FFFFFF;
+    font-family: menu;
+    font-size: 3em;
+    padding-left: 5%;
+}

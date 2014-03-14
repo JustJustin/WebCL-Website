@@ -19,6 +19,7 @@
 
 		<link rel="stylesheet" href="/css/normalize.css">
 		<link rel="stylesheet" href="/css/main.css">
+		<link rel="stylesheet" href="/css/our.css">
 		<script src="/js/vendor/modernizr-2.6.2.min.js"></script>
     
     <!-- Viewport mobile tag for sensible mobile support -->
@@ -54,7 +55,12 @@
 	<![endif]-->
 
     <!-- Include the view file for the current controller/route -->
-    <%- body %>
+    <div class="pageHeader">
+	    <span class="pageTitle">WebCL Academy</span>
+	</div>
+	<div class="pageBody">
+        <%- body %>
+	</div>
 
 
     <!--
@@ -86,6 +92,9 @@
 	</script>
 	<script src="/js/plugins.js"></script>
 	<script src="/js/main.js"></script>
+	
+	<!-- Pull in the jQueryUI script -->
+	<script src="/js/vendor/jquery-ui-1.10.4.custom.js"></script>
 
 	<!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
 	<!--
