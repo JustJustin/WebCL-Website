@@ -63,4 +63,11 @@ void clmain(void)
     $(function() {
 		$( "#tabs" ).tabs();
 	});
+	
+	document.editorInfo={
+		editors:[JSEditor, openCLEditor], 
+		initialContent:[
+			JSEditor.getSession().getValue(), 
+			openCLEditor.getSession().getValue()
+		]};
 </script>

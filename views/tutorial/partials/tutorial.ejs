@@ -1,1 +1,123 @@
-<p>Instructions will be loaded here:</p>
+<script type="text/javascript">
+function tutorialStart()
+{
+	var lesson = [
+		{ text:"Write [code]print('hello');[/code]", 'default':undefined,'editor':0,complete:function(code, user, output) {
+				var reg = /print\(['"]hello['"]\);/gi;
+				if( reg.exec( code ) ) {
+					console.log("Success code:" + code);
+					return true;
+				}
+				console.log("success() code:"+code+" user:"+user+" output:"+output);
+			}, lock: true
+		},
+		{ text:"Write [code]int ac;[/code]", 'default':undefined,'editor':1, complete: function( code, user, output) {
+				var reg = /int ac;/gi;
+				if( reg.exec( code ) ) {
+					return true;
+				}
+				return false;
+			}, lock: true
+		},
+	];
+
+	var $ll = $("ol.lessonList").first();
+	var current = 0;
+	var nextStep = undefined;
+
+	function startStep( step ) {
+		var codereg = /\[code\](.+?)\[\/code\]/g;
+		$li = document.createElement("li");
+		var splits = step.text.split(codereg);
+		for( i = 1; i < splits.length; i+=2) {
+			splits[i] = "<span class='lessonCode'>"+splits[i]+"</span>";
+		}
+		$li.innerHTML = splits.join("");
+		$ll.append($li);
+		current++;
+		
+		editorWatcher.setHandler(step.editor, step.complete);
+		if( ('lock' in step) && step['lock'] ) {
+			editorWatcher.setLock(true);
+		}
+			
+		nextStep = undefined;
+		if ( current < lesson.length ) {
+			nextStep = lesson[current];
+		}
+	}
+	/* Register ace editor watcher function */
+	var editorWatcher = {
+		initial: undefined,
+		editors: undefined,
+		handlers: {},
+		lock: false,
+		lastlock: false,
+		init: function() {
+			this.editors = document.editorInfo.editors;
+			this.initial = document.editorInfo.initialContent;
+			for( var i = 0; i < this.editors.length; ++i ) {
+				var _this = this;
+				(function (n){
+					_this.editors[i].on("change", function( e ) {
+						editorWatcher.editorHandler( e, n );
+					});
+				})(i);
+			}		
+		},
+		editorHandler: function( e, n ) {
+			var _this = editorWatcher;
+			if( (n in _this.handlers) && _this.handlers[n] ) {
+				var current = _this.editors[n].getSession().getValue();
+				var user = _this.diff(_this.initial[n], current);
+				console.log( {current:current, user:user, output:undefined} );
+				if( _this.handlers[n]( current, user, undefined ) ) {
+					_this.success(n);
+				}
+			}
+		},
+		success: function(n) {
+			window.alert( "SUCCESS" );
+			this.handlers[n] = undefined;
+			if( this.lock ) {
+				this.editors[n].setReadOnly(true);
+				this.lastlock = this.editors[n];
+			}
+			if( nextStep ) {
+				startStep(nextStep);
+			}
+		},
+		setLock: function( b ) {
+			if( b ) {
+				this.lock = true;
+			} else {
+				this.lock = false;
+				if( this.lastlock ) {
+					this.lastlock.setReadOnly(false);
+					this.lastlock = false;
+				}
+			}
+		},
+		setSuccess: function( f ) {
+			this.success = f;
+		},
+		setHandler: function( key, handler ) {
+			this.handlers[key] = handler;
+		},
+		diff: function( initial, current ) {
+			return ""; /* Incomplete */
+		}
+	}
+	console.log("tutorialStart");
+	editorWatcher.init();
+	startStep( lesson[0] );
+}
+
+$(document).ready( tutorialStart );
+</script>
+
+<div class="tutorialContent">
+<ol class="lessonList">
+
+</ol>
+</div>

@@ -58,7 +58,10 @@ function tutorialStart()
 		},
 		success: function() {
 			window.alert( "SUCCESS" );
-			this.editor.destroy();
+			this.handler = undefined;
+			if( nextStep ) {
+				startStep( nextStep );
+			}
 		},
 		setSuccess: function( f ) {
 			this.success = f;
