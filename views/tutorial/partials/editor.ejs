@@ -3,7 +3,7 @@ body {
 	overflow: hidden;
 }
 
-#codeEditor { 
+.codeEditor { 
 	margin: 0;
 	position: relative;
 	top: 0;
@@ -20,13 +20,13 @@ body {
         <li><a href="#tabs-1">Javascript</a></li>
         <li><a href="#tabs-2">Kernel</a></li>
     </ul>
-<div id="tabs-1">if (window.webcl === undefined) {
+<div id="tabs-1" class="codeEditor">if (window.webcl === undefined) {
     alert("Unfortunately your system does not support WebCL. " +
         "Make sure that you have both the OpenCL driver " +
         "and the WebCL browser extension installed.");
     return false;
 }</div>
-<div id="tabs-2">void clmain(void)
+<div id="tabs-2" class="codeEditor">void clmain(void)
 {
 	vec3 P;
 	
@@ -47,7 +47,9 @@ body {
 	openCLEditor.getSession().setMode("ace/mode/c_cpp");
 	
 	// Setup the tab UI
-    $(function() {
-        $( "#tabs" ).tabs();
-    });
+    window.onload = function() {
+		$(function() {
+			$( "#tabs" ).tabs();
+		});
+	}
 </script>
