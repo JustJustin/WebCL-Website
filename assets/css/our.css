@@ -4,6 +4,19 @@
    Author's custom styles
    ========================================================================== */
 
+body, html {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #333333;
+}
+
+.pageBody{
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
 .greyLight{
     background-color: #232323;
 }
@@ -11,11 +24,49 @@
     background-color: #222222;
 }
 
+.partContainer{
+    position:absolute;
+    height: 100%;
+	display: inline-block;
+	min-height: inherit;
+}
+.editorContainer{
+	width: 40%;
+	left: 30%;
+	border-left: 1px solid #333333;
+	border-right: 1px solid #333333;
+}
+.outputContainer{
+	position: absolute;
+	right: 0px;
+}
+.outputContainer, .tutorialContainer{
+	width: 30%;
+}
+
+.pageContainer{
+    position: relative;
+    width: 100%;
+	min-height: 450px;
+    left: 0px;
+    top: 0px;
+	border-bottom: 20px solid #232323;
+}
+.pageContainerBottom{
+	position: relative;
+	width: 100%;
+	height:20px;
+	margin:0px;
+	padding:0px;
+	background: linear-gradient(to bottom, #222222, #333333);
+}
+
 .pageHeader{
     background-color: #232323;
     display: block;
     height: 80px;
     width: 100%;
+	border-bottom: 1px solid #333333;
 }
 
 .pageTitle {
