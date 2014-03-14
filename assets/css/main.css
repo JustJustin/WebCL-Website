@@ -23,6 +23,20 @@ html {
     line-height: 1.4;
 }
 
+.pageheader{
+    background-color: #232323;
+    display: block;
+    height: 80px;
+    width: 100%;
+}
+
+.pagetitle {
+    color: #FFFFFF;
+    font-family: menu;
+    font-size: 3em;
+    padding-left: 5%;
+}
+
 /*
  * Remove text-shadow in selection highlight: h5bp.com/i
  * These selection rule sets have to be separate.
