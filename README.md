@@ -1,10 +1,5 @@
-This is a WebCl Tutorial project, built on Sails. 
-Currently the main goal is to only provide static tutorials,  
-but watch this space for new and exciting announcements!
-
-
-CS 461 / 462 / 463
-Client Requirements Document
+# CS 461 / 462 / 463
+# Client Requirements Document
 
 WebCL Interactive Tutorial
 Team Name:
