@@ -1,0 +1,19 @@
+<div>
+	<div id="instructions">
+	    <p>Instructions will be loaded here:</p>
+	</div>
+	<div id="tabs">
+	    <ul>
+	        <li>Javascript</li>
+	        <li>Kernel</li>
+	    </ul>
+	    <div id="tabs-1"><%- partial('partials/editor') %></div>
+	    <div id="tabs-2"><%- partial('partials/editor') %></div>
+	</div>
+	<div id="output">
+	    <p>The program output will go here.</p>
+	</div>
+	<script>
+	    $(function() { $('#tabs').tabs(); });
+    </script>
+</div>

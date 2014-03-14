@@ -1,0 +1,34 @@
+<style type="text/css" media="screen">
+body {
+	overflow: hidden;
+}
+
+#codeEditor { 
+	margin: 0;
+	position: relative;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	width: 600px;
+	height: 400px;
+}
+</style>
+
+<div id="codeEditor">
+void clmain(void)
+{
+	vec3 P;
+	
+	P.x = 1;
+	P.y = 2;
+	P.z = -3;
+}
+</div>
+
+<script src="/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+	var editor = ace.edit("codeEditor");
+	editor.setTheme("ace/theme/twilight");
+	editor.getSession().setMode("ace/mode/javascript");
+</script>
