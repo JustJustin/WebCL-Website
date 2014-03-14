@@ -1,0 +1,85 @@
+<script type="text/javascript">
+function tutorialStart()
+{
+	var lesson = [
+		{ text:"Write [code]print('hello');[/code]", 'default':undefined,complete:function(code, user, output) {
+				var reg = /print\(['"]hello['"]\);/gi;
+				if( reg.exec( code ) ) {
+					console.log("Success code:" + code);
+					return true;
+				}
+				console.log("success() code:"+code+" user:"+user+" output:"+output);
+			}
+		}
+	];
+
+	var $ll = $("ol.lessonList").first();
+	var current = 0;
+	var nextStep = undefined;
+
+	function startStep( step ) {
+		var codereg = /\[code\](.+?)\[\/code\]/g;
+		$li = document.createElement("li");
+		var splits = step.text.split(codereg);
+		for( i = 1; i < splits.length; i+=2) {
+			splits[i] = "<span class='lessonCode'>"+splits[i]+"</span>";
+		}
+		$li.innerHTML = splits.join("");
+		$ll.append($li);
+		current++;
+		
+		editorWatcher.setHandler(step.complete);
+			
+		nextStep = undefined;
+		if ( current < lesson.length ) {
+			nextStep = lesson[current];
+		}
+	}
+	/* Register ace editor watcher function */
+	var editorWatcher = {
+		initial: undefined,
+		editor: undefined,
+		handler: undefined,
+		init: function() {
+			this.editor = document.editorInfo.editor;
+			this.initial = document.editorInfo.initialContent;
+			this.editor.on("change", this.editorHandler );
+		},
+		editorHandler: function( e ) {
+			var _this = editorWatcher;
+			if( _this.handler ) {
+				var current = _this.editor.getSession().getValue();
+				var user = _this.diff(_this.initial, current);
+				console.log( "current:"+current+" user:"+user+" undefined" );
+				if( _this.handler( current, user, undefined ) ) {
+					_this.success();
+				}
+			}
+		},
+		success: function() {
+			window.alert( "SUCCESS" );
+			this.editor.destroy();
+		},
+		setSuccess: function( f ) {
+			this.success = f;
+		},
+		setHandler: function( handler ) {
+			this.handler = handler;
+		},
+		diff: function( initial, current ) {
+			return "";
+		}
+	}
+	console.log("tutorialStart");
+	editorWatcher.init();
+	startStep( lesson[0] );
+}
+
+$(document).ready( tutorialStart );
+</script>
+
+<div class="tutorialContent">
+<ol class="lessonList">
+
+</ol>
+</div>

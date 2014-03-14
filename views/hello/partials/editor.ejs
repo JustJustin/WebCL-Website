@@ -31,5 +31,6 @@ void clmain(void)
 	var editor = ace.edit("codeEditor");
 	editor.setTheme("ace/theme/twilight");
 	editor.getSession().setMode("ace/mode/javascript");
+	document.editorInfo={editor:editor, initialContent:editor.getSession().getValue()};
 </script>
 
