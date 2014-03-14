@@ -1,19 +1,14 @@
-<div>
-	<div id="instructions">
-	    <p>Instructions will be loaded here:</p>
+<div class="pageContainer">
+    <div class="tutorialContainer partContainer greyLight">
+        <%- partial('partials/tutorial') %>	
+    </div>
+    
+    <div class="editorContainer partContainer greyDark">
+	    <%- partial('partials/editor') %>
 	</div>
-	<div id="tabs">
-	    <ul>
-	        <li>Javascript</li>
-	        <li>Kernel</li>
-	    </ul>
-	    <div id="tabs-1"><%- partial('partials/editor') %></div>
-	    <div id="tabs-2"><%- partial('partials/editor') %></div>
+	
+	<div class="outputContainer partContainer greyLight">
+	    <%- partial('partials/output') %>
 	</div>
-	<div id="output">
-	    <p>The program output will go here.</p>
-	</div>
-	<script>
-	    $(function() { $('#tabs').tabs(); });
-    </script>
 </div>
+<div class="pageContainerBottom"></div>
