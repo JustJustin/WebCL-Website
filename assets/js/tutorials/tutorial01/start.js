@@ -21,8 +21,9 @@ function loadKernel(id){
 }
 
 function runProgram () {
-    // All output is written to element by id "output"
-    var output = "";
+    // All output.innerHTML is written to element by id "output.innerHTML"
+    var output = document.getElementById("output.innerHTML");
+	output.innerHTML = "";
 
     var i;
     
@@ -41,20 +42,20 @@ function runProgram () {
             UIvector2[i] = Math.floor(Math.random() * 100); //Random number 0..99
         }
         
-        output += "<br>Vector length = " + vectorLength;
+        output.innerHTML += "<br>Vector length = " + vectorLength;
         
         /* Hosting OpenCL computation starts with reserving the required
             resources. WebCL context is created using the default device of the
             first available platform. In addition, we will need three buffers;
             two read_only buffers for the inputs and one write only buffer for
-            the output. The size for the buffers is given as bytes. */
+            the output.innerHTML. The size for the buffers is given as bytes. */
 
         // Setup WebCL context using the default device
         var ctx = webcl.createContext ();
         
         // Reserve buffers
         var bufSize = vectorLength * 4; // size in bytes
-        output += "<br>Buffer size: " + bufSize + " bytes";
+        output.innerHTML += "<br>Buffer size: " + bufSize + " bytes";
         var bufIn1 = ctx.createBuffer (webcl.MEM_READ_ONLY, bufSize);
         var bufIn2 = ctx.createBuffer (webcl.MEM_READ_ONLY, bufSize);
         var bufOut = ctx.createBuffer (webcl.MEM_WRITE_ONLY, bufSize);
@@ -106,8 +107,8 @@ function runProgram () {
         var localWS = [8];
         var globalWS = [Math.ceil (vectorLength / localWS) * localWS];
         
-        output += "<br>Global work item size: " + globalWS;
-        output += "<br>Local work item size: " + localWS;
+        output.innerHTML += "<br>Global work item size: " + globalWS;
+        output.innerHTML += "<br>Local work item size: " + localWS;
         
         // Execute (enqueue) kernel
         cmdQueue.enqueueNDRangeKernel(kernel, globalWS.length, null,
@@ -119,26 +120,26 @@ function runProgram () {
         cmdQueue.finish (); //Finish all the operations
         
         //Print input vectors and result vector
-        output += "<br>Vector1 = ";
+        output.innerHTML += "<br>Vector1 = ";
         for (i = 0; i < vectorLength; i = i + 1) {
-            output += UIvector1[i] + ", ";
+            output.innerHTML += UIvector1[i] + ", ";
         }
-        output += "<br>Vector2 = ";
+        output.innerHTML += "<br>Vector2 = ";
         for (i = 0; i < vectorLength; i = i + 1) {
-            output += UIvector2[i] + ", ";
+            output.innerHTML += UIvector2[i] + ", ";
         }
-        output += "<br>Result = ";
+        output.innerHTML += "<br>Result = ";
         for (i = 0; i < vectorLength; i = i + 1) {
-            output += outBuffer[i] + ", ";
+            output.innerHTML += outBuffer[i] + ", ";
         }
     } catch(e) {
-        document.getElementById("output").innerHTML
+        document.getElementById("output.innerHTML").innerHTML
             += "<h3>ERROR:</h3><pre style=\"color:red;\">" + e.message
             + "</pre>";
         throw e;
     }
 	
-	return output;
+	return output.innerHTML;
 }
 
 runProgram ();

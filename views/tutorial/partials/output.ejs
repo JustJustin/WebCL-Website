@@ -4,9 +4,8 @@ function setup_button() {
 	$("#runButton").button().click(function(event){
 		event.preventDefault();
 		$("#clKernel").text(ace.edit("editor-2").getSession().getValue());
-		var js_code = ace.edit("editor-1").getSession().getValue();
-		var result = eval(js_code);
-		$("#output").html(result);
+		$("#clJS").text("function clWrapper() {\n" + ace.edit("editor-1").getSession().getValue() + "\n}\n");
+		clWrapper();
 	})
 };
 
@@ -19,6 +18,7 @@ $( document ).ready( setup_button);
 
 <script id="clKernel" type="text/x-opencl">
 </script> 
-
+<script id="clJS" type="text/javascript">
+</script> 
 
 <button id="runButton">Run</button>
