@@ -12,12 +12,13 @@ function tutorialStart()
                 	'\t\t"and the WebCL browser extension installed.");\n' +
                 '\treturn false;\n' +
                 '}',
-		    complete:function(code, user, output) {
+		    complete: function(code, user, output) {
 				var reg = /print\(['"]hello['"]\);/gi;
 				if( reg.exec( code ) ) {
 					return true;
 				}
-			}, lock: true
+			},
+			lock: true
 		},
 		{
 		    text:"Write [code]int ac;[/code]",
@@ -31,13 +32,15 @@ function tutorialStart()
                 	'\tP.y = 2;\n' +
                 	'\tP.z = -3;\n' +
                 '}',
-		    complete: function( code, user, output) {
+		    complete: function(code, user, output) {
 				var reg = /int ac;/gi;
 				if( reg.exec( code ) ) {
 					return true;
 				}
 				return false;
-			}, lock: true, release: true
+			},
+			lock: true,
+			release: true
 		},
 	];
 
