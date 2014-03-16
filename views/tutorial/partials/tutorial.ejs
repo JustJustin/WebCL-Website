@@ -5,10 +5,8 @@ function tutorialStart()
 		{ text:"Write [code]print('hello');[/code]", 'default':undefined,'editor':0,complete:function(code, user, output) {
 				var reg = /print\(['"]hello['"]\);/gi;
 				if( reg.exec( code ) ) {
-					console.log("Success code:" + code);
 					return true;
 				}
-				console.log("success() code:"+code+" user:"+user+" output:"+output);
 			}, lock: true
 		},
 		{ text:"Write [code]int ac;[/code]", 'default':undefined,'editor':1, complete: function( code, user, output) {
@@ -17,7 +15,7 @@ function tutorialStart()
 					return true;
 				}
 				return false;
-			}, lock: true
+			}, lock: true, release: true
 		},
 	];
 
@@ -37,10 +35,12 @@ function tutorialStart()
 		current++;
 		
 		editorWatcher.setHandler(step.editor, step.complete);
+		if( ('release' in step) && step['release'] ) {
+			editorWatcher.setRelease(true);
+		}
 		if( ('lock' in step) && step['lock'] ) {
 			editorWatcher.setLock(true);
 		}
-			
 		nextStep = undefined;
 		if ( current < lesson.length ) {
 			nextStep = lesson[current];
@@ -52,6 +52,7 @@ function tutorialStart()
 		editors: undefined,
 		handlers: {},
 		lock: false,
+		release: false,
 		lastlock: false,
 		init: function() {
 			this.editors = document.editorInfo.editors;
@@ -79,9 +80,15 @@ function tutorialStart()
 		success: function(n) {
 			window.alert( "SUCCESS" );
 			this.handlers[n] = undefined;
+			if( this.release && this.lastlock ) {
+				this.lastlock.setReadOnly(false);
+				this.lastlock = false;
+				this.release = false;
+			}
 			if( this.lock ) {
 				this.editors[n].setReadOnly(true);
 				this.lastlock = this.editors[n];
+				this.lock = false;
 			}
 			if( nextStep ) {
 				startStep(nextStep);
@@ -96,6 +103,13 @@ function tutorialStart()
 					this.lastlock.setReadOnly(false);
 					this.lastlock = false;
 				}
+			}
+		},
+		setRelease: function( b ) {
+			if( b ) {
+				this.release = true;
+			} else {
+				this.release = false;
 			}
 		},
 		setSuccess: function( f ) {

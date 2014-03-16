@@ -61,7 +61,15 @@ void clmain(void)
 	
 	// Setup the tab UI
     $(function() {
-		$( "#tabs" ).tabs();
+		$( "#tabs" ).tabs({
+			activate: function( event, ui ) {
+				var $pane = ui.newPanel;
+				var el = $pane.find(".codeEditor").get()[0];
+				var ace_el = ace.edit(el);
+				
+				ace_el.focus();
+			},
+		});
 	});
 	
 	document.editorInfo={
