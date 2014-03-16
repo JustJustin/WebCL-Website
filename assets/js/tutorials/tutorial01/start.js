@@ -21,8 +21,8 @@ function loadKernel(id){
 }
 
 function runProgram () {
-    // All output.innerHTML is written to element by id "output.innerHTML"
-    var output = document.getElementById("output.innerHTML");
+    // All output is written to element by id "output"
+    var output = window.document.getElementById("output");
 	output.innerHTML = "";
 
     var i;
@@ -133,7 +133,7 @@ function runProgram () {
             output.innerHTML += outBuffer[i] + ", ";
         }
     } catch(e) {
-        document.getElementById("output.innerHTML").innerHTML
+        document.getElementById("output").innerHTML
             += "<h3>ERROR:</h3><pre style=\"color:red;\">" + e.message
             + "</pre>";
         throw e;
