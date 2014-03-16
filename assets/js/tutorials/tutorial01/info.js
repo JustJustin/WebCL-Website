@@ -40,8 +40,8 @@ var tutorial_data =
         },
 		{
             text:"Go ahead and run the code a couple times. You should be able to see that the vectors are randomly generated every time. " +
-			"We are now looking at the javascipt side of an WebCL program, where much of the work in setting up the kernel code we saw last time happens. " +
-			"Navigate through the code to where the arrays UIvector1 and UIvector1 and initialized. You should see a loop where <code>Math.random</code> is being called." +
+			"We are now looking at the JavaScript side of an WebCL program, where much of the work in setting up the kernel code we saw last time happens. " +
+			"Navigate through the code to where the arrays UIvector1 and UIvector1 are initialized. You should see a loop where <code>Math.random</code> is being called. " +
 			"Replace the right hand side of both statements in the loop with i + 1 to make sure our code is working!",
             editor:0,
             editorText: false,
