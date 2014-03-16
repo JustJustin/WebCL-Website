@@ -37,34 +37,16 @@ function tutorialStart()
         [allow_skip]: bool
                     - If set to true, allows the step to be skipped by clicking the 
                         "Next Step" button.
+						
+		[init] : bool
+					- Step to load in files 
     */
     var lesson = [
-		{
-            text:"Init 1",
-            editor:0,
-            editorText:'/js/tutorials/tutorial01/start.js',
-            complete: function(code, user, output) {
-                return true;
-            },
-            lock: false,
-            force_focus: false,
-        },
-        {
-            text:"Init 2",
-            editor:1,
-            editorText:'/js/tutorials/tutorial01/start.c',
-            complete: function(code, user, output) {
-                return true;
-            },
-            lock: false,
-            release: true,
-            force_focus: false,
-            allow_skip: true
-        },
         {
             text:"Write [code]print('hello');[/code]",
             editor:0,
-            editorText: false,
+            editorText:'/js/tutorials/tutorial01/start.js',
+			otherText:  {'1':'/js/tutorials/tutorial01/start.c' },
             complete: function(code, user, output) {
                 var reg = /print\(['"]hello['"]\);/gi;
                 if( reg.exec( code ) ) {
@@ -72,7 +54,7 @@ function tutorialStart()
                 }
             },
             lock: false,
-            force_focus: true,
+            force_focus: false,
         },
         {
             text:"Write [code]int ac;[/code]",
@@ -151,12 +133,14 @@ function tutorialStart()
         if( step.editorText ) {
 
 			$.get(step.editorText, function (data) {
-				setEditorText(step.editor, data, false)
-				});
+				step.editorText = setEditorText(step.editor, data, false)
+				}, "html");
         }
         if( ('otherText' in step) && step['otherText'] ) {
             for( k in step['otherText'] ) {
-                step['otherText'][k] = setEditorText( k, step['otherText'][k], false );
+				$.get(step['otherText'][k], function(data){
+					step['otherText'][k] = setEditorText( k, data, false );
+				}, "html");
             }
         }
         if( step.complete ) {

@@ -4,7 +4,6 @@ function detectCL() {
 		alert("No webCL detected!");
 		return false;
 	} else {
-		alert("WebCL detected!");
 		return true;
 	}
 }
