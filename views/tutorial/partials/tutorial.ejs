@@ -54,6 +54,10 @@ function tutorialStart()
         console.log("FATAL FETCH ERROR");
         return;
     }
+	
+	if( ('name' in tutorial_data) && tutorial_data['name'] ){
+		$(".lessonName").text(tutorial_data.name);
+	}
     var lesson = tutorial_data.steps;
     var $ll = $("ol.lessonList").first();
     var current = 0;
@@ -84,6 +88,8 @@ function tutorialStart()
         $($li).fadeIn().effect("highlight");
         current++;
         
+		editorWatcher.focus(step.editor);
+		
         editorWatcher.current = step.editor;
         function setEditorText( editor, text, focus ) {
             var cursorReg = /\[cursor\]/g;
@@ -224,6 +230,17 @@ function tutorialStart()
             }
             this.focusRelease = true;
         },
+		focus: function( n ) {
+            $tabs = $("#tabs");
+            $tabs.tabs("option", "active", n);
+            for( var i = 0; i < this.editors.length; ++i ) {
+                if( i == n ) {
+					$tabs.tabs(i);
+                    break;
+                }
+                
+            }
+        },
         setRelease: function( b ) {
             if( b ) {
                 this.release = true;
@@ -251,6 +268,7 @@ window.tutorialStart = tutorialStart;
 </script>
 
 <div class="tutorialContent">
+<h3 class = "lessonName"></h3>
 <ol class="lessonList">
 
 </ol>

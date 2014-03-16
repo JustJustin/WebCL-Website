@@ -34,7 +34,7 @@ function runProgram () {
         }
         
         // Generate input vectors
-        var vectorLength = 30;
+        var vectorLength = 5;
         var UIvector1 = new Uint32Array(vectorLength);    
         var UIvector2 = new Uint32Array(vectorLength);
         for (i = 0; i < vectorLength;  i = i+1) {
