@@ -6,6 +6,11 @@
 	width:100%;
 	height:100%;
 }
+.tutorialContainer div.nextButton{
+	position: absolute;
+	bottom: 0px;
+	right: 5px;
+}
 
 #tabs{
     min-height: inherit;

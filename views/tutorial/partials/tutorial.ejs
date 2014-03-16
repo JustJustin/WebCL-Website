@@ -12,6 +12,7 @@ function tutorialStart()
                 	'\t\t"Make sure that you have both the OpenCL driver " +\n' +
                 	'\t\t"and the WebCL browser extension installed.");\n' +
                 '\treturn false;\n' +
+				'\t[cursor]\n' +
                 '}',
 		    complete: function(code, user, output) {
 				var reg = /print\(['"]hello['"]\);/gi;
@@ -20,7 +21,7 @@ function tutorialStart()
 				}
 			},
 			lock: true,
-			focus: true
+			force_focus: true,
 		},
 		{
 		    text:"Write [code]int ac;[/code]",
@@ -43,25 +44,64 @@ function tutorialStart()
 			},
 			lock: true,
 			release: true,
-			force_focus: true
+			force_focus: true,
+			allow_skip: true
 		},
+		{
+			text: "Skip me!",
+			editor: 0,
+			editorText: "Blank",
+			complete: false,
+			lock: true,
+			force_focus: true
+		}
 	];
 	var $ll = $("ol.lessonList").first();
 	var current = 0;
 	var nextStep = undefined;
 
+	function convertToAcePos( text, pos ) {
+		lines = text.split("\n");
+		for( var i = 0, x = 0; i < lines.length; ++i ) {
+			if( (x + lines[i].length + 1) < pos ) {
+				x += lines[i].length + 1;
+			} else {
+				return [i+1, pos - x];
+			}
+		}
+		return( false );
+	}
 	function startStep( step ) {
-		var codereg = /\[code\](.+?)\[\/code\]/g;
+		var codeReg = /\[code\](.+?)\[\/code\]/g;
 		$li = document.createElement("li");
-		var splits = step.text.split(codereg);
+		var splits = step.text.split(codeReg);
 		for( i = 1; i < splits.length; i+=2) {
 			splits[i] = "<span class='lessonCode'>"+splits[i]+"</span>";
 		}
 		$li.innerHTML = splits.join("");
 		$ll.append($li);
 		current++;
-		document.editorInfo.editors[step.editor].setValue(step.editorText);
-		editorWatcher.setHandler(step.editor, step.complete);
+		
+		editorWatcher.current = step.editor;
+		if( step.editorText ) {
+			var cursorReg = /\[cursor\]/g;
+			var splits = step.editorText.split(cursorReg);
+			var cursorPos = false;
+			if( splits.length > 1 ) {
+				cursorPos = splits[0].length;
+				step.editorText = splits.join("");
+				cursorPos = convertToAcePos( step.editorText, cursorPos );
+			}
+			document.editorInfo.editors[step.editor].setValue(step.editorText, 1);
+			if(cursorPos) {
+				console.log( "Setting cursor to "+cursorPos );
+				document.editorInfo.editors[step.editor].gotoLine(cursorPos[0], cursorPos[1], false);
+			}
+			document.editorInfo.editors[step.editor].focus();
+		}
+		if( step.complete ) {
+			editorWatcher.setHandler(step.editor, step.complete);
+		}
 		if( ('release' in step) && step['release'] ) {
 			editorWatcher.setRelease(true);
 		}
@@ -74,6 +114,11 @@ function tutorialStart()
 		if( ('focus' in step) && step['focus'] ) {
 			$("#tabs").tabs("option", "active", step.editor);
 		}
+		if( !step.complete || ( ('allow_skip' in step) && step['allow_skip'] ) ) {
+			document.querySelector(".tutorialContent .nextButton").style.display = "block";
+		} else {
+			document.querySelector(".tutorialContent .nextButton").style.display = "none";
+		}
 		nextStep = undefined;
 		if ( current < lesson.length ) {
 			nextStep = lesson[current];
@@ -82,6 +127,7 @@ function tutorialStart()
 	
 	/* Register ace editor watcher function */
 	var editorWatcher = {
+		current: 0,
 		initial: undefined,
 		editors: undefined,
 		handlers: {},
@@ -99,7 +145,8 @@ function tutorialStart()
 						editorWatcher.editorHandler( e, n );
 					});
 				})(i);
-			}		
+			}
+			$(".tutorialContent .nextButton").click( this.buttonHandler );
 		},
 		editorHandler: function( e, n ) {
 			var _this = editorWatcher;
@@ -111,6 +158,10 @@ function tutorialStart()
 					_this.success(n);
 				}
 			}
+		},
+		buttonHandler: function(e) {
+			_this = editorWatcher;
+			_this.success(_this.current);
 		},
 		success: function(n) {
 			window.alert( "SUCCESS" );
@@ -173,10 +224,8 @@ function tutorialStart()
 		}
 	}
 	console.log("tutorialStart");
-	$.when($.tabs).then(function(){
-		editorWatcher.init();
-		startStep( lesson[0] );
-	});
+	editorWatcher.init();
+	startStep( lesson[0] );
 }
 
 /* Disgusting hack TODO: Get our generic loader object to handler our js needs */
@@ -187,4 +236,7 @@ window.tutorialStart = tutorialStart;
 <ol class="lessonList">
 
 </ol>
+<div class="nextButton">
+	<input type="button" value="Next Step"/>
+</div>
 </div>
