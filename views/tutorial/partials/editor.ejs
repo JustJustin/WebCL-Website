@@ -25,28 +25,8 @@ body {
         <li><a href="#tabs-1">Javascript</a></li>
         <li><a href="#tabs-2">Kernel</a></li>
     </ul>
-<div id="tabs-1">
-<div id="editor-1" class="codeEditor">
-if (window.webcl === undefined) {
-alert("Unfortunately your system does not support WebCL. " +
-	"Make sure that you have both the OpenCL driver " +
-	"and the WebCL browser extension installed.");
-return false;
-}
-</div>
-</div>
-<div id="tabs-2">
-<div id="editor-2" class="codeEditor">
-void clmain(void)
-{
-	vec3 P;
-	
-	P.x = 1;
-	P.y = 2;
-	P.z = -3;
-}
-</div>
-</div>
+	<div id="tabs-1"><div id="editor-1" class="codeEditor"></div></div>
+	<div id="tabs-2"><div id="editor-2" class="codeEditor"></div></div>
 </div>
 
 <script src="/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -68,6 +48,7 @@ void clmain(void)
 				var ace_el = ace.edit(el);
 				
 				ace_el.focus();
+				ace_el.resize();
 			},
 		});
 		window.tutorialStart();

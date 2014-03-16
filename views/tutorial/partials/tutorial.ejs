@@ -3,20 +3,47 @@ function tutorialStart()
 {
 	
 	var lesson = [
-		{ text:"Write [code]print('hello');[/code]", 'default':undefined,'editor':0,complete:function(code, user, output) {
+		{
+		    text:"Write [code]print('hello');[/code]",
+		    'default':undefined,
+		    'editor':0,
+		    'editorText':'if (window.webcl === undefined) {\n' +
+                '\talert("Unfortunately your system does not support WebCL. " +\n' +
+                	'\t\t"Make sure that you have both the OpenCL driver " +\n' +
+                	'\t\t"and the WebCL browser extension installed.");\n' +
+                '\treturn false;\n' +
+                '}',
+		    complete: function(code, user, output) {
 				var reg = /print\(['"]hello['"]\);/gi;
 				if( reg.exec( code ) ) {
 					return true;
 				}
-			}, lock: true, focus: true
+			},
+			lock: true,
+			focus: true
 		},
-		{ text:"Write [code]int ac;[/code]", 'default':undefined,'editor':1, complete: function(code, user, output) {
+		{
+		    text:"Write [code]int ac;[/code]",
+		    'default':undefined,
+		    'editor':1,
+		    'editorText':'void clmain(void)\n' +
+                '{\n' +
+                	'\tvec3 P;\n' +
+                	'\n' +
+                	'\tP.x = 1;\n' +
+                	'\tP.y = 2;\n' +
+                	'\tP.z = -3;\n' +
+                '}',
+		    complete: function(code, user, output) {
 				var reg = /int ac;/gi;
 				if( reg.exec( code ) ) {
 					return true;
 				}
 				return false;
-			}, lock: true, release: true, force_focus: true
+			},
+			lock: true,
+			release: true,
+			force_focus: true
 		},
 	];
 	var $ll = $("ol.lessonList").first();
@@ -33,7 +60,7 @@ function tutorialStart()
 		$li.innerHTML = splits.join("");
 		$ll.append($li);
 		current++;
-		
+		document.editorInfo.editors[step.editor].setValue(step.editorText);
 		editorWatcher.setHandler(step.editor, step.complete);
 		if( ('release' in step) && step['release'] ) {
 			editorWatcher.setRelease(true);
@@ -52,6 +79,7 @@ function tutorialStart()
 			nextStep = lesson[current];
 		}
 	}
+	
 	/* Register ace editor watcher function */
 	var editorWatcher = {
 		initial: undefined,
