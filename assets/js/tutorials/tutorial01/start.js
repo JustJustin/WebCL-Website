@@ -1,8 +1,30 @@
+function detectCL() {
 
-function vectorAdd () {
+	if (window.webcl == undefined){
+		alert("No webCL detected!");
+		return false;
+	} else {
+		alert("WebCL detected!");
+		return true;
+	}
+}
+
+function loadKernel(id){
+  var kernelElement = document.getElementById(id);
+  var kernelSource = kernelElement.text;
+  if (kernelElement.src != "") {
+      var mHttpReq = new XMLHttpRequest();
+      mHttpReq.open("GET", kernelElement.src, false);
+      mHttpReq.send(null);
+      kernelSource = mHttpReq.responseText;
+  } 
+  return kernelSource;
+}
+
+function runProgram () {
     // All output is written to element by id "output"
-    var output = document.getElementById("output");
-    output.innerHTML = "";
+    var output = "";
+
     var i;
     
     try {
@@ -20,7 +42,7 @@ function vectorAdd () {
             UIvector2[i] = Math.floor(Math.random() * 100); //Random number 0..99
         }
         
-        output.innerHTML += "<br>Vector length = " + vectorLength;
+        output += "<br>Vector length = " + vectorLength;
         
         /* Hosting OpenCL computation starts with reserving the required
             resources. WebCL context is created using the default device of the
@@ -33,7 +55,7 @@ function vectorAdd () {
         
         // Reserve buffers
         var bufSize = vectorLength * 4; // size in bytes
-        output.innerHTML += "<br>Buffer size: " + bufSize + " bytes";
+        output += "<br>Buffer size: " + bufSize + " bytes";
         var bufIn1 = ctx.createBuffer (webcl.MEM_READ_ONLY, bufSize);
         var bufIn2 = ctx.createBuffer (webcl.MEM_READ_ONLY, bufSize);
         var bufOut = ctx.createBuffer (webcl.MEM_WRITE_ONLY, bufSize);
@@ -46,7 +68,7 @@ function vectorAdd () {
         code. At this point, we can also initialize the kernel arguments. */
         
         // Create and build program for the first device
-        var kernelSrc = loadKernel("clProgramVectorAdd");
+        var kernelSrc = loadKernel("clKernel");
         var program = ctx.createProgram(kernelSrc);
         var device = ctx.getInfo(WebCL.CONTEXT_DEVICES)[0];
         
@@ -85,8 +107,8 @@ function vectorAdd () {
         var localWS = [8];
         var globalWS = [Math.ceil (vectorLength / localWS) * localWS];
         
-        output.innerHTML += "<br>Global work item size: " + globalWS;
-        output.innerHTML += "<br>Local work item size: " + localWS;
+        output += "<br>Global work item size: " + globalWS;
+        output += "<br>Local work item size: " + localWS;
         
         // Execute (enqueue) kernel
         cmdQueue.enqueueNDRangeKernel(kernel, globalWS.length, null,
@@ -98,17 +120,17 @@ function vectorAdd () {
         cmdQueue.finish (); //Finish all the operations
         
         //Print input vectors and result vector
-        output.innerHTML += "<br>Vector1 = ";
+        output += "<br>Vector1 = ";
         for (i = 0; i < vectorLength; i = i + 1) {
-            output.innerHTML += UIvector1[i] + ", ";
+            output += UIvector1[i] + ", ";
         }
-        output.innerHTML += "<br>Vector2 = ";
+        output += "<br>Vector2 = ";
         for (i = 0; i < vectorLength; i = i + 1) {
-            output.innerHTML += UIvector2[i] + ", ";
+            output += UIvector2[i] + ", ";
         }
-        output.innerHTML += "<br>Result = ";
+        output += "<br>Result = ";
         for (i = 0; i < vectorLength; i = i + 1) {
-            output.innerHTML += outBuffer[i] + ", ";
+            output += outBuffer[i] + ", ";
         }
     } catch(e) {
         document.getElementById("output").innerHTML
@@ -116,4 +138,8 @@ function vectorAdd () {
             + "</pre>";
         throw e;
     }
+	
+	return output;
 }
+
+runProgram ();

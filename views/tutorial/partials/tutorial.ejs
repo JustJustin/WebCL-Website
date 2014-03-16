@@ -41,149 +41,7 @@ function tutorialStart()
 		{
             text:"Init 1",
             editor:0,
-            editorText:'function detectCL() {\n' +
-						'if (window.webcl == undefined){\n' +
-							'alert("No webCL detected!");\n' +
-							'return false;\n' +
-						'} else {\n' +
-							'return true;\n' +
-						'}\n' +
-					'}\n' +
-
-					'function loadKernel(id){\n' +
-						'var kernelElement = document.getElementById(id);\n' +
-						'var kernelSource = kernelElement.text;\n' +
-						'if (kernelElement.src != "") {\n' +
-							'var mHttpReq = new XMLHttpRequest();\n' +
-							'mHttpReq.open("GET", kernelElement.src, false);\n' +
-							'mHttpReq.send(null);\n' +
-							'kernelSource = mHttpReq.responseText;\n' +
-						'}\n' +
-						'return kernelSource;\n' +
-					'}\n' +
-
-					'function runProgram () {\n' +
-						'// All output is written to element by id "output"\n' +
-						'var output = "";\n' +
-
-						'var i;\n' +
-					'	\n' +
-						'try {\n' +
-							'// First check if the WebCL extension is installed at all\n' +
-							'if (!detectCL()) {\n' +
-								'return false;\n' +
-							'}\n' +
-						'	\n' +
-							'// Generate input vectors\n' +
-							'var vectorLength = 30;\n' +
-							'var UIvector1 = new Uint32Array(vectorLength);    \n' +
-							'var UIvector2 = new Uint32Array(vectorLength);\n' +
-							'for (i = 0; i < vectorLength;  i = i+1) {\n' +
-								'UIvector1[i] = Math.floor(Math.random() * 100); //Random number 0..99\n' +
-								'UIvector2[i] = Math.floor(Math.random() * 100); //Random number 0..99\n' +
-							'}\n' +
-						'	\n' +
-							'output += "<br>Vector length = " + vectorLength;\n' +
-						'	\n' +
-							'/* Hosting OpenCL computation starts with reserving the required\n' +
-								'resources. WebCL context is created using the default device of the\n' +
-								'first available platform. In addition, we will need three buffers;\n' +
-								'two read_only buffers for the inputs and one write only buffer for\n' +
-								'the output. The size for the buffers is given as bytes. */\n' +
-
-							'// Setup WebCL context using the default device\n' +
-							'var ctx = webcl.createContext ();\n' +
-						'	\n' +
-							'// Reserve buffers\n' +
-							'var bufSize = vectorLength * 4; // size in bytes\n' +
-							'output += "<br>Buffer size: " + bufSize + " bytes";\n' +
-							'var bufIn1 = ctx.createBuffer (webcl.MEM_READ_ONLY, bufSize);\n' +
-							'var bufIn2 = ctx.createBuffer (webcl.MEM_READ_ONLY, bufSize);\n' +
-							'var bufOut = ctx.createBuffer (webcl.MEM_WRITE_ONLY, bufSize);\n' +
-						'	\n' +
-							'/* Next we will create a program object. The kernel code is loaded with\n' +
-							'the loadKernel function and built for the defined device. Possible\n' +
-							'failure with compilation is printed out as an alert box. Then, the\n' +
-							'kernel code "ckVectorAdd" is selected for the kernel object. Let us\n' +
-							'remark that there could be several kernel descriptions in kernel source\n' +
-							'code. At this point, we can also initialize the kernel arguments. */\n' +
-						'	\n' +
-							'// Create and build program for the first device\n' +
-							'var kernelSrc = loadKernel("clKernel");\n' +
-							'var program = ctx.createProgram(kernelSrc);\n' +
-							'var device = ctx.getInfo(WebCL.CONTEXT_DEVICES)[0];\n' +
-						'	\n' +
-							'try {\n' +
-								'program.build ([device], "");\n' +
-							'} catch(e) {\n' +
-								'alert ("Failed to build WebCL program. Error "\n' +
-									'+ program.getBuildInfo (device, webcl.PROGRAM_BUILD_STATUS)\n' +
-									'+ ":  "\n' +
-									'+ program.getBuildInfo (device, webcl.PROGRAM_BUILD_LOG));\n' +
-								'throw e;\n' +
-							'}\n' +
-						'	\n' +
-							'// Create kernel and set arguments\n' +
-							'var kernel = program.createKernel ("ckVectorAdd");\n' +
-							'kernel.setArg (0, bufIn1);\n' +
-							'kernel.setArg (1, bufIn2);\n' +
-							'kernel.setArg (2, bufOut);\n' +
-							'kernel.setArg (3, new Uint32Array([vectorLength]));\n' +
-						'	\n' +
-							'/* Next thing to do is to create Command queue. After that, local and\n' +
-							'global work sizes are defined. Let us note that the global work size\n' +
-							'must be multiple of local work size. The actual execution is enqueued\n' +
-							'with enqueueNDRangeKernel. After the execution, the results can be read\n' +
-							'from the OpenCL device with enqueueReadBuffer. Finally, the commmand\n' +
-							'queue is flushed with cmdQueue.finish. */\n' +
-						'	\n' +
-							'// Create command queue using the first available device\n' +
-							'var cmdQueue = ctx.createCommandQueue (device);\n' +
-						'	\n' +
-							'// Write the buffer to OpenCL device memory\n' +
-							'cmdQueue.enqueueWriteBuffer(bufIn1, false, 0, bufSize, UIvector1);\n' +
-							'cmdQueue.enqueueWriteBuffer(bufIn2, false, 0, bufSize, UIvector2);\n' +
-						'	\n' +
-							'// Init ND-range\n' +
-							'var localWS = [8];\n' +
-							'var globalWS = [Math.ceil (vectorLength / localWS) * localWS];\n' +
-						'	\n' +
-							'output += "<br>Global work item size: " + globalWS;\n' +
-							'output += "<br>Local work item size: " + localWS;\n' +
-						'	\n' +
-							'// Execute (enqueue) kernel\n' +
-							'cmdQueue.enqueueNDRangeKernel(kernel, globalWS.length, null,\n' +
-														'  globalWS, localWS);\n' +
-						'	\n' +
-							'// Read the result buffer from OpenCL device\n' +
-							'var outBuffer = new Uint32Array(vectorLength);\n' +
-							'cmdQueue.enqueueReadBuffer (bufOut, false, 0, bufSize, outBuffer);\n' +
-							'cmdQueue.finish (); //Finish all the operations\n' +
-						'	\n' +
-							'//Print input vectors and result vector\n' +
-							'output += "<br>Vector1 = ";\n' +
-							'for (i = 0; i < vectorLength; i = i + 1) {\n' +
-								'output += UIvector1[i] + ", ";\n' +
-							'}\n' +
-							'output += "<br>Vector2 = ";\n' +
-							'for (i = 0; i < vectorLength; i = i + 1) {\n' +
-								'output += UIvector2[i] + ", ";\n' +
-							'}\n' +
-							'output += "<br>Result = ";\n' +
-							'for (i = 0; i < vectorLength; i = i + 1) {\n' +
-								'output += outBuffer[i] + ", ";\n' +
-							'}\n' +
-						'} catch(e) {\n' +
-							'document.getElementById("output").innerHTML\n' +
-								'+= "<h3>ERROR:</h3><pre style=\\"color:red;\\">" + e.message\n' +
-								'+ "</pre>";\n' +
-							'throw e;\n' +
-						'}\n' +
-					'	\n' +
-						'return output;\n' +
-					'}\n' +
-
-					'runProgram ();',
+            editorText:'/js/tutorials/tutorial01/start.js',
             complete: function(code, user, output) {
                 return true;
             },
@@ -193,18 +51,7 @@ function tutorialStart()
         {
             text:"Init 2",
             editor:1,
-            editorText:'  kernel void ckVectorAdd(global uint* vectorIn1,\n'+ 
-                          'global uint* vectorIn2,\n' +
-'                          global uint* vectorOut,\n' +
-'                          uint uiVectorWidth) {\n' +
-'     uint x = get_global_id(0);\n' +
-'     if (x >= uiVectorWidth)\n' +
-'     {\n' +
-'       return;\n' +
-'    }\n' +
-'    // add the vector elements\n' +
-'    vectorOut[x] = vectorIn1[x] + vectorIn2[x];\n' +
-'}',
+            editorText:'/js/tutorials/tutorial01/start.c',
             complete: function(code, user, output) {
                 return true;
             },
@@ -301,7 +148,10 @@ function tutorialStart()
             return( text );
         }
         if( step.editorText ) {
-            step.editorText = setEditorText(step.editor, step.editorText, true);
+
+			$.get(step.editorText, function (data) {
+				setEditorText(step.editor, data, false)
+				});
         }
         if( ('otherText' in step) && step['otherText'] ) {
             for( k in step['otherText'] ) {
