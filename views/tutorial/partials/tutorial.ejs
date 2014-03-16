@@ -7,12 +7,7 @@ function tutorialStart()
 		    text:"Write [code]print('hello');[/code]",
 		    'default':undefined,
 		    'editor':0,
-		    'editorText':'if (window.webcl === undefined) {\n' +
-                '\talert("Unfortunately your system does not support WebCL. " +\n' +
-                	'\t\t"Make sure that you have both the OpenCL driver " +\n' +
-                	'\t\t"and the WebCL browser extension installed.");\n' +
-                '\treturn false;\n' +
-                '}',
+		    'editorText':'',
 		    complete: function(code, user, output) {
 				var reg = /print\(['"]hello['"]\);/gi;
 				if( reg.exec( code ) ) {
@@ -26,14 +21,7 @@ function tutorialStart()
 		    text:"Write [code]int ac;[/code]",
 		    'default':undefined,
 		    'editor':1,
-		    'editorText':'void clmain(void)\n' +
-                '{\n' +
-                	'\tvec3 P;\n' +
-                	'\n' +
-                	'\tP.x = 1;\n' +
-                	'\tP.y = 2;\n' +
-                	'\tP.z = -3;\n' +
-                '}',
+		    'editorText':'',
 		    complete: function(code, user, output) {
 				var reg = /int ac;/gi;
 				if( reg.exec( code ) ) {
