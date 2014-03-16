@@ -131,6 +131,9 @@ function runProgram () {
         for (i = 0; i < vectorLength; i = i + 1) {
             output.innerHTML += outBuffer[i] + ", ";
         }
+		
+		// Release all WebCL resources
+		webcl.releaseAll();
     } catch(e) {
         document.getElementById("output").innerHTML
             += "<h3>ERROR:</h3><pre style=\"color:red;\">" + e.message
