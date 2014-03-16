@@ -40,12 +40,18 @@ var tutorial_data =
         },
 		{
             text:"Go ahead and run the code a couple times. You should be able to see that the vectors are randomly generated every time. " +
-			"We are now looking at the javascipt side of an WebCL program, where much of the work in setting up the kernel code we saw last time happens. " +
-			"Navigate through the code to where the arrays UIvector1 and UIvector1 and initialized. You should see a loop where <code>Math.random</code> is being called." + 
-			"Replace the right hand side of both statements in the loop with i + 1 to make sure our code is working!",
+			"We are now looking at the javascipt side of an WebCL program, where setting up the kernel code we saw last time happens. " +
+			"Navigate through the code to where the arrays <code>UIvector1</code> and <code>UIvector2</code> are initialized. You should see a loop where " +
+			"<code>Math.random</code> is being called." + 
+			"Replace the right hand side of both statements in the loop with <code>i + 1</code> to make sure our code is working!",
             editor:0,
             editorText: false,
             complete: function(code, user, output) {
+                var reg1 = /UIvector1\[i\]\s*=\s*i\s*\+\s*1\s*;/gi;
+				var reg2 = /UIvector2\[i\]\s*=\s*i\s*\+\s*1\s*;/gi;
+                if( reg1.exec( code ) && reg2.exec( code )) {
+                    return true;
+                }
                 return false;
             },
             lock: false,
