@@ -42,7 +42,7 @@ function tutorialStart()
 					- Step to load in files 
     */
     var lesson = [
-        {
+		{
             text:"Write [code]print('hello');[/code]",
             editor:0,
             editorText:'/js/tutorials/tutorial01/start.js',
@@ -71,7 +71,7 @@ function tutorialStart()
             release: true,
             force_focus: true,
             allow_skip: true
-        },
+        }, 
         {
             text: "Skip me!",
             editor: 0,
@@ -79,7 +79,7 @@ function tutorialStart()
             complete: false,
             lock: true,
             force_focus: true
-        }
+        } 
     ];
     var $ll = $("ol.lessonList").first();
     var current = 0;
@@ -134,13 +134,13 @@ function tutorialStart()
 
 			$.get(step.editorText, function (data) {
 				step.editorText = setEditorText(step.editor, data, false)
-				}, "html");
+				}, "text");
         }
         if( ('otherText' in step) && step['otherText'] ) {
             for( k in step['otherText'] ) {
 				$.get(step['otherText'][k], function(data){
 					step['otherText'][k] = setEditorText( k, data, false );
-				}, "html");
+				}, "text");
             }
         }
         if( step.complete ) {

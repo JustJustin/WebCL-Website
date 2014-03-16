@@ -8,5 +8,5 @@ kernel void ckVectorAdd(global uint* A,
        return;
     }
     // add the vector elements
-    A[x] = B[x] + C[x];
+    C[x] = A[x] + B[x];
   }
