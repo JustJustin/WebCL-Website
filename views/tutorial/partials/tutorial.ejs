@@ -3,19 +3,20 @@ function tutorialStart()
 {   
     /* What's available for steps??? */
     /* options in [brackets] are optional and can be omitted */
-    /* text: string - The text to provide in the step text on the tutorial pane.
+    /*  text: string 
+                    - The text to provide in the step text on the tutorial pane.
                         [code]some code[/code] tag is available.
-       editor: Int  - Which editor to target
-       editorText: String/Boolean 
+        editor: Int - Which editor to target
+        editorText: String/Boolean 
                     - The text to set in the targeted editor
                         Set to false to not mess with the text in the editor
                         [cursor] tag available to set cursor location
-       [otherText]: {Int: String}
+        [otherText]: {Int: String}
                     - Optional value. Set text for a map of editors. (Allows for 
                         the setting of text in editors other than the main one.)
                         Int is the editor to target
                         String is the text to set [cursor] tag is available
-       complete: bool function (code, user, output)/bool
+        complete: bool function (code, user, output)/bool
                     - Function to check for completion of step.
                         (user and output currently have no useful value)
                         code contains the current editor input
