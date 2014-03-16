@@ -12,6 +12,7 @@ function tutorialStart()
                 '\treturn false;\n' +
                 '\t[cursor]\n' +
                 '}',
+            otherText: {1: "You shouldn't see this."},
             complete: function(code, user, output) {
                 var reg = /print\(['"]hello['"]\);/gi;
                 if( reg.exec( code ) ) {
@@ -32,6 +33,7 @@ function tutorialStart()
                        '\tP.y = 2;\n'       +
                        '\tP.z = -3;\n'      +
                        '}',
+            
             complete: function(code, user, output) {
                 var reg = /int ac;/gi;
                 if( reg.exec( code ) ) {
@@ -83,21 +85,32 @@ function tutorialStart()
         current++;
         
         editorWatcher.current = step.editor;
-        if( step.editorText ) {
+        function setEditorText( editor, text, focus ) {
             var cursorReg = /\[cursor\]/g;
-            var splits = step.editorText.split(cursorReg);
+            var splits = text.split(cursorReg);
             var cursorPos = false;
             if( splits.length > 1 ) {
                 cursorPos = splits[0].length;
-                step.editorText = splits.join("");
-                cursorPos = convertToAcePos( step.editorText, cursorPos );
+                text = splits.join("");
+                cursorPos = convertToAcePos( text, cursorPos );
             }
-            document.editorInfo.editors[step.editor].setValue(step.editorText, 1);
-            if(cursorPos) {
-                console.log( "Setting cursor to "+cursorPos );
-                document.editorInfo.editors[step.editor].gotoLine(cursorPos[0], cursorPos[1], false);
+            console.log( "Setting editor:"+editor+" "+text);
+            document.editorInfo.editors[editor].setValue(text, 1);
+            if( cursorPos ) {
+                document.editorInfo.editors[editor].gotoLine(cursorPos[0], cursorPos[1], false);
             }
-            document.editorInfo.editors[step.editor].focus();
+            if( focus ) {
+                document.editorInfo.editors[editor].focus();
+            }
+            return( text );
+        }
+        if( step.editorText ) {
+            step.editorText = setEditorText(step.editor, step.editorText, true);
+        }
+        if( ('otherText' in step) && step['otherText'] ) {
+            for( k in step['otherText'] ) {
+                step['otherText'][k] = setEditorText( k, step['otherText'][k], false );
+            }
         }
         if( step.complete ) {
             editorWatcher.setHandler(step.editor, step.complete);
