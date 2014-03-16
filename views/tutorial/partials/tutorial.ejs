@@ -1,7 +1,6 @@
 <script type="text/javascript">
 function tutorialStart()
 {
-    
     var lesson = [
         {
             text:"Write [code]print('hello');[/code]",
@@ -74,10 +73,13 @@ function tutorialStart()
         $li = document.createElement("li");
         var splits = step.text.split(codeReg);
         for( i = 1; i < splits.length; i+=2) {
-            splits[i] = "<span class='lessonCode'>"+splits[i]+"</span>";
+            splits[i] = "<code class='lessonCode'>"+splits[i]+"</code>";
         }
         $li.innerHTML = splits.join("");
+        $li.style.display = "none";
+        $($ll).children().wrap("<strike>");
         $ll.append($li);
+        $($li).fadeIn().effect("highlight");
         current++;
         
         editorWatcher.current = step.editor;
