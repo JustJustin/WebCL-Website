@@ -1,1 +1,24 @@
-<p>The program output will go here.</p>
+
+<script type="text/javascript">
+function setup_button() {
+	$("#runButton").button().click(function(event){
+		event.preventDefault();
+		$("#clKernel").text(ace.edit("editor-2").getSession().getValue());
+		var js_code = ace.edit("editor-1").getSession().getValue();
+		var result = eval(js_code);
+		$("#output").html(result);
+	})
+};
+
+
+$( document ).ready( setup_button);
+</script>
+
+<p id="output">The program output will go here.</p>
+
+
+<script id="clKernel" type="text/x-opencl">
+</script> 
+
+
+<button id="runButton">Run</button>
