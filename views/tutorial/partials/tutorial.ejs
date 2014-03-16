@@ -1,24 +1,24 @@
 <script type="text/javascript">
 function tutorialStart()
 {
+	
 	var lesson = [
 		{ text:"Write [code]print('hello');[/code]", 'default':undefined,'editor':0,complete:function(code, user, output) {
 				var reg = /print\(['"]hello['"]\);/gi;
 				if( reg.exec( code ) ) {
 					return true;
 				}
-			}, lock: true
+			}, lock: true, focus: true
 		},
-		{ text:"Write [code]int ac;[/code]", 'default':undefined,'editor':1, complete: function( code, user, output) {
+		{ text:"Write [code]int ac;[/code]", 'default':undefined,'editor':1, complete: function(code, user, output) {
 				var reg = /int ac;/gi;
 				if( reg.exec( code ) ) {
 					return true;
 				}
 				return false;
-			}, lock: true, release: true
+			}, lock: true, release: true, force_focus: true
 		},
 	];
-
 	var $ll = $("ol.lessonList").first();
 	var current = 0;
 	var nextStep = undefined;
@@ -41,6 +41,12 @@ function tutorialStart()
 		if( ('lock' in step) && step['lock'] ) {
 			editorWatcher.setLock(true);
 		}
+		if( ('force_focus' in step) && step['force_focus'] ) {
+			editorWatcher.forceFocus( step.editor );
+		}
+		if( ('focus' in step) && step['focus'] ) {
+			$("#tabs").tabs("option", "active", step.editor);
+		}
 		nextStep = undefined;
 		if ( current < lesson.length ) {
 			nextStep = lesson[current];
@@ -54,6 +60,7 @@ function tutorialStart()
 		lock: false,
 		release: false,
 		lastlock: false,
+		focusRelease: false,
 		init: function() {
 			this.editors = document.editorInfo.editors;
 			this.initial = document.editorInfo.initialContent;
@@ -85,6 +92,10 @@ function tutorialStart()
 				this.lastlock = false;
 				this.release = false;
 			}
+			if( this.focusRelease ) {
+				this.focusRelease = false;
+				$("#tabs").tabs("enable");
+			}
 			if( this.lock ) {
 				this.editors[n].setReadOnly(true);
 				this.lastlock = this.editors[n];
@@ -105,6 +116,17 @@ function tutorialStart()
 				}
 			}
 		},
+		forceFocus: function( n ) {
+			$tabs = $("#tabs");
+			$tabs.tabs("option", "active", n);
+			for( var i = 0; i < this.editors.length; ++i ) {
+				if( i == n ) {
+					continue;
+				}
+				$tabs.tabs("disable", i);
+			}
+			this.focusRelease = true;
+		},
 		setRelease: function( b ) {
 			if( b ) {
 				this.release = true;
@@ -123,11 +145,14 @@ function tutorialStart()
 		}
 	}
 	console.log("tutorialStart");
-	editorWatcher.init();
-	startStep( lesson[0] );
+	$.when($.tabs).then(function(){
+		editorWatcher.init();
+		startStep( lesson[0] );
+	});
 }
 
-$(document).ready( tutorialStart );
+/* Disgusting hack TODO: Get our generic loader object to handler our js needs */
+window.tutorialStart = tutorialStart;
 </script>
 
 <div class="tutorialContent">
