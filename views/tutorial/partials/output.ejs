@@ -1,11 +1,27 @@
 
+<script id="clKernel" type="text/x-opencl">
+</script> 
+<script id="clJS" type="text/javascript">
+</script> 
+
 <script type="text/javascript">
 function setup_button() {
 	$("#runButton").button().click(function(event){
 		event.preventDefault();
 		$("#clKernel").text(ace.edit("editor-2").getSession().getValue());
-		$("#clJS").text("function clWrapper() {\n" + ace.edit("editor-1").getSession().getValue() + "\n}\n");
-		clWrapper();
+        
+        var callCL = "clWrapper();";
+        var $script = $(document.createElement("script"));
+        $script.get()[0].type="text/javascript";
+        $script.get()[0].id = "clJS";
+        
+        $script.html("function clWrapper() {\n" + ace.edit("editor-1").getSession().getValue() + "\n}\n"+callCL);
+        
+		$("#clJS").remove();
+        
+        $script.load(function() { clWrapper() } );
+        $(document).find("body").append($script);
+        
 	})
 };
 
@@ -14,11 +30,5 @@ $( document ).ready( setup_button);
 </script>
 
 <p id="output">The program output will go here.</p>
-
-
-<script id="clKernel" type="text/x-opencl">
-</script> 
-<script id="clJS" type="text/javascript">
-</script> 
 
 <button id="runButton">Run</button>
