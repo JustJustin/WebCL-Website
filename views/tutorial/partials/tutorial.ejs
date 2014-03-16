@@ -1,170 +1,229 @@
 <script type="text/javascript">
 function tutorialStart()
 {
-	
-	var lesson = [
-		{
-		    text:"Write [code]print('hello');[/code]",
-		    'default':undefined,
-		    'editor':0,
-		    'editorText':'',
-		    complete: function(code, user, output) {
-				var reg = /print\(['"]hello['"]\);/gi;
-				if( reg.exec( code ) ) {
-					return true;
-				}
-			},
-			lock: true,
-			focus: true
-		},
-		{
-		    text:"Write [code]int ac;[/code]",
-		    'default':undefined,
-		    'editor':1,
-		    'editorText':'',
-		    complete: function(code, user, output) {
-				var reg = /int ac;/gi;
-				if( reg.exec( code ) ) {
-					return true;
-				}
-				return false;
-			},
-			lock: true,
-			release: true,
-			force_focus: true
-		},
-	];
-	var $ll = $("ol.lessonList").first();
-	var current = 0;
-	var nextStep = undefined;
+    
+    var lesson = [
+        {
+            text:"Write [code]print('hello');[/code]",
+            editor:0,
+            editorText:'if (window.webcl === undefined) {\n' +
+                '\talert("Unfortunately your system does not support WebCL. " +\n' +
+                    '\t\t"Make sure that you have both the OpenCL driver " +\n' +
+                    '\t\t"and the WebCL browser extension installed.");\n' +
+                '\treturn false;\n' +
+                '\t[cursor]\n' +
+                '}',
+            complete: function(code, user, output) {
+                var reg = /print\(['"]hello['"]\);/gi;
+                if( reg.exec( code ) ) {
+                    return true;
+                }
+            },
+            lock: true,
+            force_focus: true,
+        },
+        {
+            text:"Write [code]int ac;[/code]",
+            editor:1,
+            editorText:'void clmain(void)\n'+
+                       '{\n'                +
+                       '\tvec3 P;\n'        +
+                       '\n'                 +
+                       '\tP.x = 1;\n'       +
+                       '\tP.y = 2;\n'       +
+                       '\tP.z = -3;\n'      +
+                       '}',
+            complete: function(code, user, output) {
+                var reg = /int ac;/gi;
+                if( reg.exec( code ) ) {
+                    return true;
+                }
+                return false;
+            },
+            lock: true,
+            release: true,
+            force_focus: true,
+            allow_skip: true
+        },
+        {
+            text: "Skip me!",
+            editor: 0,
+            editorText: "Blank",
+            complete: false,
+            lock: true,
+            force_focus: true
+        }
+    ];
+    var $ll = $("ol.lessonList").first();
+    var current = 0;
+    var nextStep = undefined;
 
-	function startStep( step ) {
-		var codereg = /\[code\](.+?)\[\/code\]/g;
-		$li = document.createElement("li");
-		var splits = step.text.split(codereg);
-		for( i = 1; i < splits.length; i+=2) {
-			splits[i] = "<span class='lessonCode'>"+splits[i]+"</span>";
-		}
-		$li.innerHTML = splits.join("");
-		$ll.append($li);
-		current++;
-		document.editorInfo.editors[step.editor].setValue(step.editorText);
-		editorWatcher.setHandler(step.editor, step.complete);
-		if( ('release' in step) && step['release'] ) {
-			editorWatcher.setRelease(true);
-		}
-		if( ('lock' in step) && step['lock'] ) {
-			editorWatcher.setLock(true);
-		}
-		if( ('force_focus' in step) && step['force_focus'] ) {
-			editorWatcher.forceFocus( step.editor );
-		}
-		if( ('focus' in step) && step['focus'] ) {
-			$("#tabs").tabs("option", "active", step.editor);
-		}
-		nextStep = undefined;
-		if ( current < lesson.length ) {
-			nextStep = lesson[current];
-		}
-	}
-	
-	/* Register ace editor watcher function */
-	var editorWatcher = {
-		initial: undefined,
-		editors: undefined,
-		handlers: {},
-		lock: false,
-		release: false,
-		lastlock: false,
-		focusRelease: false,
-		init: function() {
-			this.editors = document.editorInfo.editors;
-			this.initial = document.editorInfo.initialContent;
-			for( var i = 0; i < this.editors.length; ++i ) {
-				var _this = this;
-				(function (n){
-					_this.editors[i].on("change", function( e ) {
-						editorWatcher.editorHandler( e, n );
-					});
-				})(i);
-			}		
-		},
-		editorHandler: function( e, n ) {
-			var _this = editorWatcher;
-			if( (n in _this.handlers) && _this.handlers[n] ) {
-				var current = _this.editors[n].getSession().getValue();
-				var user = _this.diff(_this.initial[n], current);
-				console.log( {current:current, user:user, output:undefined} );
-				if( _this.handlers[n]( current, user, undefined ) ) {
-					_this.success(n);
-				}
-			}
-		},
-		success: function(n) {
-			window.alert( "SUCCESS" );
-			this.handlers[n] = undefined;
-			if( this.release && this.lastlock ) {
-				this.lastlock.setReadOnly(false);
-				this.lastlock = false;
-				this.release = false;
-			}
-			if( this.focusRelease ) {
-				this.focusRelease = false;
-				$("#tabs").tabs("enable");
-			}
-			if( this.lock ) {
-				this.editors[n].setReadOnly(true);
-				this.lastlock = this.editors[n];
-				this.lock = false;
-			}
-			if( nextStep ) {
-				startStep(nextStep);
-			}
-		},
-		setLock: function( b ) {
-			if( b ) {
-				this.lock = true;
-			} else {
-				this.lock = false;
-				if( this.lastlock ) {
-					this.lastlock.setReadOnly(false);
-					this.lastlock = false;
-				}
-			}
-		},
-		forceFocus: function( n ) {
-			$tabs = $("#tabs");
-			$tabs.tabs("option", "active", n);
-			for( var i = 0; i < this.editors.length; ++i ) {
-				if( i == n ) {
-					continue;
-				}
-				$tabs.tabs("disable", i);
-			}
-			this.focusRelease = true;
-		},
-		setRelease: function( b ) {
-			if( b ) {
-				this.release = true;
-			} else {
-				this.release = false;
-			}
-		},
-		setSuccess: function( f ) {
-			this.success = f;
-		},
-		setHandler: function( key, handler ) {
-			this.handlers[key] = handler;
-		},
-		diff: function( initial, current ) {
-			return ""; /* Incomplete */
-		}
-	}
-	console.log("tutorialStart");
-	$.when($.tabs).then(function(){
-		editorWatcher.init();
-		startStep( lesson[0] );
-	});
+    function convertToAcePos( text, pos ) {
+        lines = text.split("\n");
+        for( var i = 0, x = 0; i < lines.length; ++i ) {
+            if( (x + lines[i].length + 1) < pos ) {
+                x += lines[i].length + 1;
+            } else {
+                return [i+1, pos - x];
+            }
+        }
+        return( false );
+    }
+    function startStep( step ) {
+        var codeReg = /\[code\](.+?)\[\/code\]/g;
+        $li = document.createElement("li");
+        var splits = step.text.split(codeReg);
+        for( i = 1; i < splits.length; i+=2) {
+            splits[i] = "<span class='lessonCode'>"+splits[i]+"</span>";
+        }
+        $li.innerHTML = splits.join("");
+        $ll.append($li);
+        current++;
+        
+        editorWatcher.current = step.editor;
+        if( step.editorText ) {
+            var cursorReg = /\[cursor\]/g;
+            var splits = step.editorText.split(cursorReg);
+            var cursorPos = false;
+            if( splits.length > 1 ) {
+                cursorPos = splits[0].length;
+                step.editorText = splits.join("");
+                cursorPos = convertToAcePos( step.editorText, cursorPos );
+            }
+            document.editorInfo.editors[step.editor].setValue(step.editorText, 1);
+            if(cursorPos) {
+                console.log( "Setting cursor to "+cursorPos );
+                document.editorInfo.editors[step.editor].gotoLine(cursorPos[0], cursorPos[1], false);
+            }
+            document.editorInfo.editors[step.editor].focus();
+        }
+        if( step.complete ) {
+            editorWatcher.setHandler(step.editor, step.complete);
+        }
+        if( ('release' in step) && step['release'] ) {
+            editorWatcher.setRelease(true);
+        }
+        if( ('lock' in step) && step['lock'] ) {
+            editorWatcher.setLock(true);
+        }
+        if( ('force_focus' in step) && step['force_focus'] ) {
+            editorWatcher.forceFocus( step.editor );
+        }
+        if( ('focus' in step) && step['focus'] ) {
+            $("#tabs").tabs("option", "active", step.editor);
+        }
+        if( !step.complete || ( ('allow_skip' in step) && step['allow_skip'] ) ) {
+            document.querySelector(".tutorialContent .nextButton").style.display = "block";
+        } else {
+            document.querySelector(".tutorialContent .nextButton").style.display = "none";
+        }
+        nextStep = undefined;
+        if ( current < lesson.length ) {
+            nextStep = lesson[current];
+        }
+    }
+    
+    /* Register ace editor watcher function */
+    var editorWatcher = {
+        current: 0,
+        initial: undefined,
+        editors: undefined,
+        handlers: {},
+        lock: false,
+        release: false,
+        lastlock: false,
+        focusRelease: false,
+        init: function() {
+            this.editors = document.editorInfo.editors;
+            this.initial = document.editorInfo.initialContent;
+            for( var i = 0; i < this.editors.length; ++i ) {
+                var _this = this;
+                (function (n){
+                    _this.editors[i].on("change", function( e ) {
+                        editorWatcher.editorHandler( e, n );
+                    });
+                })(i);
+            }
+            $(".tutorialContent .nextButton").click( this.buttonHandler );
+        },
+        editorHandler: function( e, n ) {
+            var _this = editorWatcher;
+            if( (n in _this.handlers) && _this.handlers[n] ) {
+                var current = _this.editors[n].getSession().getValue();
+                var user = _this.diff(_this.initial[n], current);
+                console.log( {current:current, user:user, output:undefined} );
+                if( _this.handlers[n]( current, user, undefined ) ) {
+                    _this.success(n);
+                }
+            }
+        },
+        buttonHandler: function(e) {
+            _this = editorWatcher;
+            _this.success(_this.current);
+        },
+        success: function(n) {
+            window.alert( "SUCCESS" );
+            this.handlers[n] = undefined;
+            if( this.release && this.lastlock ) {
+                this.lastlock.setReadOnly(false);
+                this.lastlock = false;
+                this.release = false;
+            }
+            if( this.focusRelease ) {
+                this.focusRelease = false;
+                $("#tabs").tabs("enable");
+            }
+            if( this.lock ) {
+                this.editors[n].setReadOnly(true);
+                this.lastlock = this.editors[n];
+                this.lock = false;
+            }
+            if( nextStep ) {
+                startStep(nextStep);
+            }
+        },
+        setLock: function( b ) {
+            if( b ) {
+                this.lock = true;
+            } else {
+                this.lock = false;
+                if( this.lastlock ) {
+                    this.lastlock.setReadOnly(false);
+                    this.lastlock = false;
+                }
+            }
+        },
+        forceFocus: function( n ) {
+            $tabs = $("#tabs");
+            $tabs.tabs("option", "active", n);
+            for( var i = 0; i < this.editors.length; ++i ) {
+                if( i == n ) {
+                    continue;
+                }
+                $tabs.tabs("disable", i);
+            }
+            this.focusRelease = true;
+        },
+        setRelease: function( b ) {
+            if( b ) {
+                this.release = true;
+            } else {
+                this.release = false;
+            }
+        },
+        setSuccess: function( f ) {
+            this.success = f;
+        },
+        setHandler: function( key, handler ) {
+            this.handlers[key] = handler;
+        },
+        diff: function( initial, current ) {
+            return ""; /* Incomplete */
+        }
+    }
+    console.log("tutorialStart");
+    editorWatcher.init();
+    startStep( lesson[0] );
 }
 
 /* Disgusting hack TODO: Get our generic loader object to handler our js needs */
@@ -175,4 +234,7 @@ window.tutorialStart = tutorialStart;
 <ol class="lessonList">
 
 </ol>
+<div class="nextButton">
+    <input type="button" value="Next Step"/>
+</div>
 </div>
