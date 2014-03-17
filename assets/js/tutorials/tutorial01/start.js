@@ -1,10 +1,11 @@
-function detectCL() {
+function getWebCL() {
 	if (window.webcl === undefined){
-		alert("No webCL detected!");
-		return false;
-	} else {
-		return true;
+		if( window.WebCL === undefined ) {
+            return false;
+        }
+        return window.WebCL;
 	}
+    return window.webcl;
 }
 
 function loadKernel(id) {
@@ -28,8 +29,9 @@ function runProgram () {
 
     try {
         // First check if the WebCL extension is installed at all
-        if (!detectCL()) {
-            return false;
+        var webcl = getWebCL();
+        if (!webcl) {
+            throw {message:"This device does not support webcl"};
         }
 
         // Generate input vectors
