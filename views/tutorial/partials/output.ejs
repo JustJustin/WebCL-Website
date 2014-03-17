@@ -7,8 +7,8 @@
 function setup_button() {
 	$("#runButton").button().click(function(event){
 		event.preventDefault();
-		$("#clKernel").text(ace.edit("editor-2").getSession().getValue());
-		eval(ace.edit("editor-1").getSession().getValue());
+		$("#clKernel").text(document.editorInfo.editors[1].getValue());
+		eval(document.editorInfo.editors[0].getValue());
         
 	})
 };
