@@ -399,9 +399,9 @@ function tutorialStart()
         num = /[0-9]/.exec( window.location.hash );
     }
     if( num ) {
-        if( num == "1" ) {
-            lessonManager.init( "othertutorial" );
-        } else if( num == "0" ) {
+        if( num == "2" ) {
+            lessonManager.init( "/js/tutorials/tutorial02/info.js" );
+        } else if( num == "1" ||  num == "0") {
             lessonManager.init( "/js/tutorials/tutorial01/info.js" );
         }
         else {

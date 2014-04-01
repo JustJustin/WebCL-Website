@@ -9,24 +9,31 @@
 
 
 <script id="clKernel" type="text/x-opencl">
+</script>
+
+<script id="addJS" type="text/javascript">
 </script> 
 
 
 <script type="text/javascript">
-function setup_button() {
-	$("#runButton").button().click(function(event){
+function setup_buttons() {
+	$("#loadButton").button().click(function(event){
 		event.preventDefault();
+		//$("#addJS").text(document.editorInfo.editors[0].getValue());		
 		$("#clKernel").text(document.editorInfo.editors[1].getValue());
 		$("#output").html(document.editorInfo.editors[2].getValue());
 		eval(document.editorInfo.editors[0].getValue());
-        
-	})
+	});
 };
 
 
-$( document ).ready( setup_button);
+$( document ).ready(setup_buttons);
 </script>
+
+<div>
+
+<button id="loadButton">Load</button>
 
 <div id="output">The program output will go here.</div>
 
-<button id="runButton">Run</button>
+</div>
