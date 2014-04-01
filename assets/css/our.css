@@ -2,6 +2,10 @@
  * WebCL Tutorial website CSS
  ***/
 
+#headerMenu ul.ui-menu {
+    z-index: 1;
+}
+
 div.tutorialContainer{
     height:100%;
     position: relative;
