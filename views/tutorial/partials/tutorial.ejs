@@ -72,11 +72,11 @@ function tutorialStart()
             if( request != undefined ) {
                 return this.fetch( request );
             }
-            return this.fetch( "/js/tutorials/tutorial01/info.js", false ); 
+            return this.fetch( "/js/tutorials/tutorial01/info.js" ); 
         },
         fetch: function( url ) {
             var req = new XMLHttpRequest();
-            req.open("GET", url, false ); /* < That false is bad, fix that */
+            req.open("GET", url, true ); /* < That false is bad, fix that */
             
             var _this = this;
             req.onload = function() {
@@ -334,7 +334,23 @@ function tutorialStart()
     }
     console.log("tutorialStart");
     editorWatcher.init();
-    lessonManager.init();
+    var num = false;
+    if( window.location.hash ) {
+        num = /[0-9]/.exec( window.location.hash );
+    }
+    if( num ) {
+        if( num == "1" ) {
+            lessonManager.init( "othertutorial" );
+        } else if( num == "0" ) {
+            lessonManager.init( "/js/tutorials/tutorial01/info.js" );
+        }
+        else {
+            console.log( "ERROR: " + num + " not a tutorial index" );
+            lessonManager.init();
+        }
+    } else {
+        lessonManager.init();
+    }
 }
 
 /* Disgusting hack TODO: Get our generic loader object to handler our js needs */
