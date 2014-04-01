@@ -172,9 +172,11 @@ function tutorialStart()
             if( ('otherText' in step) && step['otherText'] ) {
                 var _this = this;
                 for( k in step['otherText'] ) {
-                    $.get(step['otherText'][k], function(data){
-                        step['otherText'][k] = _this.setEditorText( k, data, false );
-                    }, "text");
+                    (function(n) {
+                        $.get(step['otherText'][n], function(data){
+                            step['otherText'][n] = _this.setEditorText( n, data, false );
+                        }, "text");
+                    })(k);
                 }
             }
             /* Handles completion function handler *required* */
