@@ -41,7 +41,7 @@ function runProgram () {
 	
 	
   // All output is written to element by id "output"
-  var output = document.getElementById("output");
+  var output = document.getElementById("outputText");
   output.innerHTML = "";
 
   try {
@@ -80,7 +80,7 @@ function runProgram () {
     var bufOut = ctx.createBuffer (WebCL.MEM_WRITE_ONLY, bufSize);
 
      // Create and build program
-    var kernelSrc = loadKernel("clProgramEdge");
+    var kernelSrc = loadKernel("clKernel");
     var program = ctx.createProgram(kernelSrc);
     var device = ctx.getInfo(WebCL.CONTEXT_DEVICES)[0];
     try {
@@ -95,7 +95,7 @@ function runProgram () {
     }
 
     // Create kernel and set arguments
-    var kernel = program.createKernel ("clEdge");
+    var kernel = program.createKernel ("clDesaturate");
     kernel.setArg (0, bufIn);
     kernel.setArg (1, bufOut);
     kernel.setArg (2, new Uint32Array([width]));

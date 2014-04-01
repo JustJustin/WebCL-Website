@@ -1,4 +1,4 @@
-  kernel void clEdge(global const uchar4* src,
+kernel void clEdge(global const uchar4* src,
                            global uchar4* dst,
                            uint width, 
                            uint height)
