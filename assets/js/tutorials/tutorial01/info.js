@@ -8,7 +8,7 @@ var tutorial_data =
 			" with us. When you are ready to begin go ahead and press next step below.",
             editor:1,
             editorText: '/js/tutorials/tutorial01/start.c',
-            otherText: {'0':'/js/tutorials/tutorial01/start.js',  },
+            otherText: {'0':'/js/tutorials/tutorial01/start.js', '2' : '/js/tutorials/tutorial01/start.html' },
             complete: function(code, user, output) {
                 var reg = /print\(['"]hello['"]\);/gi;
                 if( reg.exec( code ) ) {

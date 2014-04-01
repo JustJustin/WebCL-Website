@@ -24,9 +24,11 @@ body {
     <ul>
         <li><a href="#tabs-1">Javascript</a></li>
         <li><a href="#tabs-2">Kernel</a></li>
+		<li><a href="#tabs-3">Output</a></li>
     </ul>
 	<div id="tabs-1"><div id="editor-1" class="codeEditor"></div></div>
 	<div id="tabs-2"><div id="editor-2" class="codeEditor"></div></div>
+	<div id="tabs-3"><div id="editor-3" class="codeEditor"></div></div>
 </div>
 
 <script src="/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -35,9 +37,14 @@ body {
     var JSEditor = ace.edit("editor-1");
 	JSEditor.setTheme("ace/theme/twilight");
 	JSEditor.getSession().setMode("ace/mode/javascript");
+	
 	var openCLEditor = ace.edit("editor-2");
 	openCLEditor.setTheme("ace/theme/twilight");
 	openCLEditor.getSession().setMode("ace/mode/c_cpp");
+	
+	var outputEditor = ace.edit("editor-3");
+	outputEditor.setTheme("ace/theme/twilight");
+	outputEditor.getSession().setMode("ace/mode/html");
 	
 	// Setup the tab UI
     $(function() {
@@ -55,9 +62,10 @@ body {
 	});
 	
 	document.editorInfo={
-		editors:[JSEditor, openCLEditor], 
+		editors:[JSEditor, openCLEditor, outputEditor], 
 		initialContent:[
 			JSEditor.getSession().getValue(), 
-			openCLEditor.getSession().getValue()
+			openCLEditor.getSession().getValue(),
+			outputEditor.getSession().getValue()
 		]};
 </script>

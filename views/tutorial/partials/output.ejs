@@ -17,6 +17,7 @@ function setup_button() {
 	$("#runButton").button().click(function(event){
 		event.preventDefault();
 		$("#clKernel").text(document.editorInfo.editors[1].getValue());
+		$("#output").html(document.editorInfo.editors[2].getValue());
 		eval(document.editorInfo.editors[0].getValue());
         
 	})
@@ -26,6 +27,6 @@ function setup_button() {
 $( document ).ready( setup_button);
 </script>
 
-<p id="output" class="tutorialOutput">The program output will go here.</p>
+<div id="output">The program output will go here.</div>
 
 <button id="runButton">Run</button>

@@ -22,7 +22,7 @@ function loadKernel(id) {
 
 function runProgram () {
     // All output is written to element by id "output"
-    var output = window.document.getElementById("output");
+    var output = window.document.getElementById("outputText");
 	output.innerHTML = "";
 
     var i;
