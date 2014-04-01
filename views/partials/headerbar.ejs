@@ -1,3 +1,19 @@
+<script>
+	$(function() {
+		$("#headerMenu").menu();
+	});
+</script>
+<style>
+	.ui-menu { width: 150px; }
+</style>
 <div class="pageHeader">
 	<a href="/" ><span class="pageTitle">WebCL Academy</span></a>
+	<div style="float: right;">
+		<ul id="headerMenu">
+			<li><span>Menu</span><ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="/tutorial">Tutorials</a></li>
+				<li class="ui-state-disabled"><a href="#">Account</a></li>
+			</li>
+		</ul>
 </div>
