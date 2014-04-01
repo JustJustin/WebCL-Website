@@ -96,9 +96,18 @@ function tutorialStart()
             function calculateInnerText( el, holder ) {
                 var lineHeight = holder.text("a").height();
                 var currentText = el.fullText;
-                if( lineCharWidth ) { 
-                    // TODO: do shortcut based on initial calculation
-                    // currentText = shortcutText;
+                if( lineCharWidth && currentText.length > lineCharWidth ) {
+                    // shortcut - start at word after last step length 
+                    var i = currentText.substr(lineCharWidth).indexOf(" ");
+                    if( i != -1 ) {
+                        currentText = currentText.substr(0, lineCharWidth + i);
+                    }
+                } else { 
+                    // Make an initial guess based off of width of charcter
+                    var charWidth = holder.parent().width() / (holder.width() - 2); 
+                    if( currentText.length > charWidth ) {
+                        currentText = currentText.substr(0, charWidth);
+                    }
                 }
                 holder.text( currentText + "..." );
                 while( holder.height() > lineHeight ) {
@@ -109,14 +118,12 @@ function tutorialStart()
                         currentText = currentText.substr(0, i);
                     }
                     holder.text( currentText + "..." );
-                    console.log( currentText );
                 }
                 lineCharWidth = currentText.length;
                 return currentText + "...";
             }
             for( var i = 1; i < $lis.length - 1; ++i ) {
                 var el = $lis[i];
-                console.log(el);
                 if( !$(el).hasClass("lmContractor") ) {
                     el.fullText = $(el).text();
                     el.innerText = calculateInnerText( el, $($lis[0]) );
