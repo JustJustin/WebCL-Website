@@ -16,8 +16,8 @@ var tutorial_data =
                 }
             },
             lock: false,
-            force_focus: false,
-			allow_skip: true
+            forceFocus: false,
+			allowSkip: true
         }, {
             text:"In the editor window you can see the kernel code of your first WebCl program. This is code that is" +
 			" sent to the graphics card to be evaluated. This particular code takes to vector arrays, A and B, and adds them together into C. "
@@ -35,8 +35,8 @@ var tutorial_data =
             },
             lock: false,
             release: false,
-            force_focus: false,
-            allow_skip: false
+            forceFocus: false,
+            allowSkip: false
         },
 		{
             text:"Go ahead and run the code a couple times. You should be able to see that the vectors are randomly generated every time. " +
@@ -53,10 +53,11 @@ var tutorial_data =
                 }
                 return false;
             },
+            gotoText: {0: /UIvector1/},
             lock: false,
             release: false,
-            force_focus: false,
-            allow_skip: false
-        }
+            forceFocus: false,
+            allowSkip: false
+        },
     ]
 };

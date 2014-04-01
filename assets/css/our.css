@@ -2,9 +2,9 @@
  * WebCL Tutorial website CSS
  ***/
 
-.tutorialContainer{
-    width:100%;
+div.tutorialContainer{
     height:100%;
+    position: relative;
 }
 .tutorialContainer div.nextButton{
     position: absolute;
@@ -110,8 +110,8 @@ body, html {
     border-right: 1px solid #333333;
 }
 .outputContainer{
-    position: absolute;
     right: 0px;
+    float: right;
 }
 .outputContainer, .tutorialContainer{
     width: 30%;

@@ -15,7 +15,12 @@ function tutorialStart()
                     - Optional value. Set text for a map of editors. (Allows for 
                         the setting of text in editors other than the main one.)
                         Int is the editor to target
-                        String is the text to set [cursor] tag is available
+                        String is the text to set, [cursor] tag is available
+        [gotoText]: {Int: /Regex/}
+                    - Optional value. Jump to position of string in editor.
+                        evaluates regex on editor position and jumps to where
+                        the matched string starts. 
+                        Int is the editor to target
         complete: bool function (code, user, output)/bool
                     - Function to check for completion of step.
                         (user and output currently have no useful value)
@@ -31,38 +36,21 @@ function tutorialStart()
                         step has been completed.
         [focus]: bool 
                     - If set to true, focuses the targeted editor. (Switches to tab)
-        [force_focus]: bool
+        [forceFocus]: bool
                     - If set to true, focuses the targeted editor and disables other
                         tabs until this step has been completed.
-        [allow_skip]: bool
+        [allowSkip]: bool
                     - If set to true, allows the step to be skipped by clicking the 
                         "Next Step" button.
 						
 		[init] : bool
 					- Step to load in files 
     */
-    var req = new XMLHttpRequest();
-    req.open("GET", "/js/tutorials/tutorial01/info.js", false); /* < That false is bad, fix that */
-    req.send();
-    /* XMLHttpRequest is legit yo */
-    if( req.status == 200 ) {
-        var el = document.createElement("script");
-        el.type = "text/javascript";
-        el.innerHTML = req.responseText;
-        document.body.appendChild(el);
-    } else {
-        console.log("FATAL FETCH ERROR");
-        return;
-    }
-	
-	if( ('name' in tutorial_data) && tutorial_data['name'] ){
-		$(".lessonName").text(tutorial_data.name);
-	}
-    var lesson = tutorial_data.steps;
-    var $ll = $("ol.lessonList").first();
-    var current = 0;
-    var nextStep = undefined;
-
+    
+    /* Converts a string offset to the equivalent ace editor position.
+       returns array( lineno, columno )
+       TODO: Move to generic function file.
+    */
     function convertToAcePos( text, pos ) {
         lines = text.split("\n");
         for( var i = 0, x = 0; i < lines.length; ++i ) {
@@ -74,24 +62,60 @@ function tutorialStart()
         }
         return( false );
     }
-    function startStep( step ) {
-        var codeReg = /\[code\](.+?)\[\/code\]/g;
-        $li = document.createElement("li");
-        var splits = step.text.split(codeReg);
-        for( i = 1; i < splits.length; i+=2) {
-            splits[i] = "<code class='lessonCode'>"+splits[i]+"</code>";
-        }
-        $li.innerHTML = splits.join("");
-        $li.style.display = "none";
-        $($ll).children().wrap("<strike>");
-        $ll.append($li);
-        $($li).fadeIn().effect("highlight");
-        current++;
-        
-		editorWatcher.focus(step.editor);
-		
-        editorWatcher.current = step.editor;
-        function setEditorText( editor, text, focus ) {
+    
+    var lessonManager = {
+        current: 0,
+        lesson: false,
+        nextStep: false,
+        $lessonList: false,
+        init: function( request ) {
+            if( request != undefined ) {
+                return this.fetch( request );
+            }
+            return this.fetch( "/js/tutorials/tutorial01/info.js", false ); 
+        },
+        fetch: function( url ) {
+            var req = new XMLHttpRequest();
+            req.open("GET", url, false ); /* < That false is bad, fix that */
+            
+            var _this = this;
+            req.onload = function() {
+                if( this.status == 200 ) {
+                    _this.handleResponse( this.responseText );
+                } else {
+                    console.log( "FATAL: fetch error for "+url );
+                }
+            }
+            req.send();
+        },
+        handleResponse: function( response ) {
+            if( /tutorial_data/.exec( response ) == false ) {
+                console.log( "Fatal: no tutorial_data in request response" );
+                return;
+            }
+            /* Evaluates JSON response with function */
+            var el = document.createElement("script");
+            el.type = "text/javascript";
+            el.innerHTML = response;
+            document.body.appendChild( el );
+            if( tutorial_data ) {
+                this.startTutorial( tutorial_data );
+            } else {
+                console.log( "Fatal: No tutorial_data" );
+            }
+        },
+        startTutorial: function( tutorial_data ) {
+            if( ( 'name' in tutorial_data) && (tutorial_data['name']) ) {
+                $(".lessonName").text(tutorial_data.name);
+            } else {
+                $(".lessonName").text("Tutorial");
+            }
+            
+            this.lesson = tutorial_data.steps;
+            this.$lessonList = $("ol.lessonList").first();
+            this.step( this.lesson[0] );
+        },
+        setEditorText: function( editor, text, focus ) {
             var cursorReg = /\[cursor\]/g;
             var splits = text.split(cursorReg);
             var cursorPos = false;
@@ -100,7 +124,7 @@ function tutorialStart()
                 text = splits.join("");
                 cursorPos = convertToAcePos( text, cursorPos );
             }
-            console.log( "Setting editor:"+editor+" "+text);
+            //console.log( "Setting editor:"+editor+" "+text);
             document.editorInfo.editors[editor].setValue(text, 1);
             if( cursorPos ) {
                 document.editorInfo.editors[editor].gotoLine(cursorPos[0], cursorPos[1], false);
@@ -109,43 +133,82 @@ function tutorialStart()
                 document.editorInfo.editors[editor].focus();
             }
             return( text );
-        }
-        if( step.editorText ) {
-
-			$.get(step.editorText, function (data) {
-				step.editorText = setEditorText(step.editor, data, false)
-				}, "text");
-        }
-        if( ('otherText' in step) && step['otherText'] ) {
-            for( k in step['otherText'] ) {
-				$.get(step['otherText'][k], function(data){
-					step['otherText'][k] = setEditorText( k, data, false );
-				}, "text");
+        },
+        step: function( step ) {
+            var codeReg = /\[code\](.+?)\[\/code\]/g;
+            $li = document.createElement("li");
+            var splits = step.text.split(codeReg);
+            for( i = 1; i < splits.length; i+=2) {
+                splits[i] = "<code class='lessonCode'>"+splits[i]+"</code>";
             }
-        }
-        if( step.complete ) {
-            editorWatcher.setHandler(step.editor, step.complete);
-        }
-        if( ('release' in step) && step['release'] ) {
-            editorWatcher.setRelease(true);
-        }
-        if( ('lock' in step) && step['lock'] ) {
-            editorWatcher.setLock(true);
-        }
-        if( ('force_focus' in step) && step['force_focus'] ) {
-            editorWatcher.forceFocus( step.editor );
-        }
-        if( ('focus' in step) && step['focus'] ) {
-            $("#tabs").tabs("option", "active", step.editor);
-        }
-        if( !step.complete || ( ('allow_skip' in step) && step['allow_skip'] ) ) {
-            document.querySelector(".tutorialContent .nextButton").style.display = "block";
-        } else {
-            document.querySelector(".tutorialContent .nextButton").style.display = "none";
-        }
-        nextStep = undefined;
-        if ( current < lesson.length ) {
-            nextStep = lesson[current];
+            $li.innerHTML = splits.join("");
+            $li.style.display = "none";
+            $(this.$lessonList).children().wrap("<strike>");
+            this.$lessonList.append($li);
+            $($li).fadeIn().effect("highlight");
+            this.current++;
+            
+            editorWatcher.focus(step.editor);
+            editorWatcher.current = step.editor;
+            
+            if( step.editorText ) {
+                var _this = this;
+                $.get(step.editorText, function (data) {
+                    step.editorText = _this.setEditorText(step.editor, data, false)
+                    }, "text");
+            } else if( ('gotoText' in step) && step['gotoText'] ) {
+                /* Jump to position in editor */
+                for( k in step['gotoText'] ) { 
+                    /* TODO: Fix for off-focus editor */
+                    var editorText = document.editorInfo.editors[k].getValue();
+                    var pos = step.gotoText[k].exec( editorText );
+                    if( pos ) {
+                        pos = convertToAcePos( editorText, pos.index );
+                        document.editorInfo.editors[k].gotoLine(pos[0], pos[1], false );
+                    }
+                }
+            }
+            /* Handle settting text in other tutorials */
+            if( ('otherText' in step) && step['otherText'] ) {
+                var _this = this;
+                for( k in step['otherText'] ) {
+                    $.get(step['otherText'][k], function(data){
+                        step['otherText'][k] = _this.setEditorText( k, data, false );
+                    }, "text");
+                }
+            }
+            /* Handles completion function handler *required* */
+            if( step.complete ) {
+                editorWatcher.setHandler(step.editor, step.complete);
+            }
+            /* Handles releasing editor lock */
+            if( ('release' in step) && step['release'] ) {
+                editorWatcher.setRelease(true);
+            }
+            /* handles locking editor */
+            if( ('lock' in step) && step['lock'] ) {
+                editorWatcher.setLock(true);
+            }
+            /* handles locking tab */
+            if( ('forceFocus' in step) && step['forceFocus'] ) {
+                editorWatcher.forceFocus( step.editor );
+            }
+            /* handler switching tab */
+            if( ('focus' in step) && step['focus'] ) {
+                $("#tabs").tabs("option", "active", step.editor);
+            }
+            /* Allows user to skip : note if completion function is false this will force allowSkip */
+            if( !step.complete || ( ('allowSkip' in step) && step['allowSkip'] ) ) {
+                editorWatcher.allowSkip = true;
+                document.querySelector(".tutorialContent .nextButton").style.display = "block";
+            } else {
+                editorWatcher.allowSkip = false;
+                document.querySelector(".tutorialContent .nextButton").style.display = "none";
+            }
+            this.nextStep = false;
+            if ( this.current < this.lesson.length ) {
+                this.nextStep = this.lesson[this.current];
+            }
         }
     }
     
@@ -159,6 +222,7 @@ function tutorialStart()
         release: false,
         lastlock: false,
         focusRelease: false,
+        allowSkip: false,
         init: function() {
             this.editors = document.editorInfo.editors;
             this.initial = document.editorInfo.initialContent;
@@ -172,12 +236,13 @@ function tutorialStart()
             }
             $(".tutorialContent .nextButton").click( this.buttonHandler );
         },
+        /* e = ace thingy, n = editor index */
         editorHandler: function( e, n ) {
             var _this = editorWatcher;
             if( (n in _this.handlers) && _this.handlers[n] ) {
                 var current = _this.editors[n].getSession().getValue();
                 var user = _this.diff(_this.initial[n], current);
-                console.log( {current:current, user:user, output:undefined} );
+                //console.log( {current:current, user:user, output:undefined} );
                 if( _this.handlers[n]( current, user, undefined ) ) {
                     _this.success(n);
                 }
@@ -185,10 +250,12 @@ function tutorialStart()
         },
         buttonHandler: function(e) {
             _this = editorWatcher;
-            _this.success(_this.current);
+            if( _this.allowSkip ) {
+                _this.success(_this.current);
+            }
         },
         success: function(n) {
-            window.alert( "SUCCESS" );
+            console.log( "Success " + this.current );
             this.handlers[n] = undefined;
             if( this.release && this.lastlock ) {
                 this.lastlock.setReadOnly(false);
@@ -204,8 +271,8 @@ function tutorialStart()
                 this.lastlock = this.editors[n];
                 this.lock = false;
             }
-            if( nextStep ) {
-                startStep(nextStep);
+            if( lessonManager.nextStep ) {
+                lessonManager.step( lessonManager.nextStep );
             }
         },
         setLock: function( b ) {
@@ -254,13 +321,18 @@ function tutorialStart()
         setHandler: function( key, handler ) {
             this.handlers[key] = handler;
         },
+        tempDiffWarnOnce: false,
         diff: function( initial, current ) {
+            if( !this.tempDiffWarnOnce ) {
+                console.log("WARNING: Diff Unimplemented");
+                this.tempDiffWarnOnce = true;
+            }
             return ""; /* Incomplete */
         }
     }
     console.log("tutorialStart");
     editorWatcher.init();
-    startStep( lesson[0] );
+    lessonManager.init();
 }
 
 /* Disgusting hack TODO: Get our generic loader object to handler our js needs */
