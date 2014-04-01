@@ -69,10 +69,71 @@ function tutorialStart()
         nextStep: false,
         $lessonList: false,
         init: function( request ) {
+            this.$lessonList = $("ol.lessonList").first();
+            this.$lessonList.parent(".tutorialContainer").resize( this.resizeHandler );
+        
             if( request != undefined ) {
                 return this.fetch( request );
             }
             return this.fetch( "/js/tutorials/tutorial01/info.js" ); 
+        },
+        resizeHandler: function() {
+            var _this = lessonManager;
+            _this.contractSteps();
+        },
+        contractSteps: function() {
+            var $lis = this.$lessonList.find( "li" );
+            /* Insert our calculator element */
+            if( !$lis.first().hasClass( "lmCalcWidth" ) ) {
+                var el = document.createElement("li");
+                el.className = "lmCalcWidth";
+                el.style = "display: none;";
+                this.$lessonList.prepend( el );
+                
+                $lis = this.$lessonList.find( "li" );
+            }
+            var lineCharWidth = false;
+            function calculateInnerText( el, holder ) {
+                var lineHeight = holder.text("a").height();
+                var currentText = el.fullText;
+                if( lineCharWidth ) { 
+                    // TODO: do shortcut based on initial calculation
+                    // currentText = shortcutText;
+                }
+                holder.text( currentText + "..." );
+                while( holder.height() > lineHeight ) {
+                    var i = currentText.lastIndexOf(" ");
+                    if( i == -1 ) {
+                        currentText = currentText.substr(0, currentText.length - 1);
+                    } else { 
+                        currentText = currentText.substr(0, i);
+                    }
+                    holder.text( currentText + "..." );
+                    console.log( currentText );
+                }
+                lineCharWidth = currentText.length;
+                return currentText + "...";
+            }
+            for( var i = 1; i < $lis.length - 1; ++i ) {
+                var el = $lis[i];
+                console.log(el);
+                if( !$(el).hasClass("lmContractor") ) {
+                    el.fullText = $(el).text();
+                    el.innerText = calculateInnerText( el, $($lis[0]) );
+                    $(el).text( el.innerText );
+                    $(el).click( this.clickHandler );
+                    $(el).addClass("lmContractor");
+                } else { 
+                    el.innerText = calculateInnerText( el, $($lis[0]) );
+                }
+            }
+        },
+        clickHandler: function() {
+            console.log( this );
+            if( this.innerText == $(this).text() ) {
+                return $(this).text(this.fullText);
+            }
+            return $(this).text(this.innerText);
         },
         fetch: function( url ) {
             var req = new XMLHttpRequest();
@@ -112,7 +173,6 @@ function tutorialStart()
             }
             
             this.lesson = tutorial_data.steps;
-            this.$lessonList = $("ol.lessonList").first();
             this.step( this.lesson[0] );
         },
         setEditorText: function( editor, text, focus ) {
@@ -143,9 +203,10 @@ function tutorialStart()
             }
             $li.innerHTML = splits.join("");
             $li.style.display = "none";
-            $(this.$lessonList).children().wrap("<strike>");
+            $(this.$lessonList).children().last().wrap("<strike>");
             this.$lessonList.append($li);
             $($li).fadeIn().effect("highlight");
+            this.contractSteps();
             this.current++;
             
             editorWatcher.focus(step.editor);
@@ -307,7 +368,6 @@ function tutorialStart()
 					$tabs.tabs(i);
                     break;
                 }
-                
             }
         },
         setRelease: function( b ) {
