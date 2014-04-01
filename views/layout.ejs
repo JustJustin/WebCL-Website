@@ -57,11 +57,11 @@
 	<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 	<![endif]-->
 
-    <!-- Include the view file for the current controller/route -->
-    <div class="pageHeader">
-	    <a href="/" ><span class="pageTitle">WebCL Academy</span></a>
-	</div>
+    <!-- Include the header partial -->
+    <%- partial("partials/headerbar") %>
+
 	<div class="pageBody">
+		<!-- Include the view file for the current controller/route -->
         <%- body %>
 	</div>
 
