@@ -3,7 +3,7 @@ function getWebCL() {
 		if( window.WebCL === undefined ) {
             return false;
         }
-        return window.WebCL;
+        return new window.WebCL;
 	}
     return window.webcl;
 }
