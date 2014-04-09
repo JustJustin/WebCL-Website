@@ -48,7 +48,7 @@ module.exports = {
 				res.json({ error: 'User not found' }, 404);
 			}
 		});
-	}
+	},
 
   /**
    * Overrides for the settings in `config/controllers.js`

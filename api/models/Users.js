@@ -27,7 +27,7 @@ module.exports = {
 			type: 'STRING',
 			email: true
 		}
-	}
+	},
 
 	// Override the adapter
 	//adapter: 'memory',
