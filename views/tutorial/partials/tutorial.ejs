@@ -42,9 +42,9 @@ function tutorialStart()
         [allowSkip]: bool
                     - If set to true, allows the step to be skipped by clicking the 
                         "Next Step" button.
-						
-		[init] : bool
-					- Step to load in files 
+                        
+        [init] : bool
+                    - Step to load in files 
     */
     
     /* Converts a string offset to the equivalent ace editor position.
@@ -77,10 +77,12 @@ function tutorialStart()
             }
             return this.fetch( "/js/tutorials/tutorial01/info.js" ); 
         },
+        /* Fired when a dom resize even happens on the container div. */
         resizeHandler: function() {
             var _this = lessonManager;
             _this.contractSteps();
         },
+        /* Contract previous steps - Also recalculates contraction size */
         contractSteps: function() {
             var $lis = this.$lessonList.find( "li" );
             /* Insert our calculator element */
@@ -90,9 +92,11 @@ function tutorialStart()
                 el.style = "display: none;";
                 this.$lessonList.prepend( el );
                 
+                /* Rebuild list with new calc element */
                 $lis = this.$lessonList.find( "li" );
             }
             var lineCharWidth = false;
+            /* Calculate what the contracted text should look like */
             function calculateInnerText( el, holder ) {
                 var lineHeight = holder.text("a").height();
                 var currentText = el.fullText;
@@ -103,13 +107,14 @@ function tutorialStart()
                         currentText = currentText.substr(0, lineCharWidth + i);
                     }
                 } else { 
-                    // Make an initial guess based off of width of charcter
+                    // Make an initial guess based off of width of character, minus some
                     var charWidth = holder.parent().width() / (holder.width() - 2); 
                     if( currentText.length > charWidth ) {
                         currentText = currentText.substr(0, charWidth);
                     }
                 }
                 holder.text( currentText + "..." );
+                // Remove words or characters until we meet width restriction.
                 while( holder.height() > lineHeight ) {
                     var i = currentText.lastIndexOf(" ");
                     if( i == -1 ) {
@@ -122,6 +127,7 @@ function tutorialStart()
                 lineCharWidth = currentText.length;
                 return currentText + "...";
             }
+            // Calculate inner width for each list item and contract.
             for( var i = 1; i < $lis.length - 1; ++i ) {
                 var el = $lis[i];
                 if( !$(el).hasClass("lmContractor") ) {
@@ -130,13 +136,16 @@ function tutorialStart()
                     $(el).text( el.innerText );
                     $(el).click( this.clickHandler );
                     $(el).addClass("lmContractor");
-                } else { 
+                } else {
                     el.innerText = calculateInnerText( el, $($lis[0]) );
+                    if( el.fullText != $(el).text() ) {
+                        $(el).text( el.innerText );
+                    }
                 }
             }
         },
         clickHandler: function() {
-            console.log( this );
+            //console.log( this );
             if( this.innerText == $(this).text() ) {
                 return $(this).text(this.fullText);
             }
@@ -144,7 +153,7 @@ function tutorialStart()
         },
         fetch: function( url ) {
             var req = new XMLHttpRequest();
-            req.open("GET", url, true ); /* < That false is bad, fix that */
+            req.open("GET", url, true );
             
             var _this = this;
             req.onload = function() {
@@ -203,7 +212,7 @@ function tutorialStart()
         },
         step: function( step ) {
             var codeReg = /\[code\](.+?)\[\/code\]/g;
-            $li = document.createElement("li");
+            var $li = document.createElement("li");
             var splits = step.text.split(codeReg);
             for( i = 1; i < splits.length; i+=2) {
                 splits[i] = "<code class='lessonCode'>"+splits[i]+"</code>";
@@ -227,7 +236,6 @@ function tutorialStart()
             } else if( ('gotoText' in step) && step['gotoText'] ) {
                 /* Jump to position in editor */
                 for( k in step['gotoText'] ) { 
-                    /* TODO: Fix for off-focus editor */
                     var editorText = document.editorInfo.editors[k].getValue();
                     var pos = step.gotoText[k].exec( editorText );
                     if( pos ) {
@@ -367,12 +375,12 @@ function tutorialStart()
             }
             this.focusRelease = true;
         },
-		focus: function( n ) {
+        focus: function( n ) {
             $tabs = $("#tabs");
             $tabs.tabs("option", "active", n);
             for( var i = 0; i < this.editors.length; ++i ) {
                 if( i == n ) {
-					$tabs.tabs(i);
+                    $tabs.tabs(i);
                     break;
                 }
             }
