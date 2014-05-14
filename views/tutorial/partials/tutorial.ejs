@@ -71,11 +71,31 @@ function tutorialStart()
         init: function( request ) {
             this.$lessonList = $("ol.lessonList").first();
             this.$lessonList.parent(".tutorialContainer").resize( this.resizeHandler );
+            $(".resetButton input").click(this.resetHandler);
         
             if( request != undefined ) {
                 return this.fetch( request );
             }
             return this.fetch( "/js/tutorials/tutorial01/info.js" ); 
+        },
+        resetHandler: function() {
+            var _this = lessonManager;
+            var step = _this.lesson[ _this.current - 1 ];
+            if( "_init_info" in step ) {
+                _this.reset(step);
+            } else { console.log( "No init info", console.trace() ); }
+        },
+        reset: function( step ) {
+            var info = step._init_info;
+			console.log("reset", step, info);
+			for( var i = 0; i < info.editors.length; ++i ) {
+				var editor = info.editors[i];
+				
+				document.editorInfo.editors[i].setValue(editor.initialContents);
+				if( editor.cpos ) {
+					document.editorInfo.editors[i].gotoLine(editor.cpos[0], editor.cpos[1], false);
+				}
+			}
         },
         /* Fired when a dom resize even happens on the container div. */
         resizeHandler: function() {
@@ -190,6 +210,11 @@ function tutorialStart()
             
             this.lesson = tutorial_data.steps;
             this.step( this.lesson[0] );
+            
+            this.tryLoadUserData();
+        },
+        tryLoadUserData: function() {
+            console.log( "Unimplemented", console.trace() );
         },
         setEditorText: function( editor, text, focus ) {
             var cursorReg = /\[cursor\]/g;
@@ -210,28 +235,49 @@ function tutorialStart()
             }
             return( text );
         },
-        step: function( step ) {
+        /* Creates code elements around code in the step text */
+        createCodeTags: function( text ) {
             var codeReg = /\[code\](.+?)\[\/code\]/g;
-            var $li = document.createElement("li");
-            var splits = step.text.split(codeReg);
+            var splits = text.split(codeReg);
+            
             for( i = 1; i < splits.length; i+=2) {
                 splits[i] = "<code class='lessonCode'>"+splits[i]+"</code>";
             }
-            $li.innerHTML = splits.join("");
+            return splits.join("");
+        },
+        strikeSteps: function() {
+            var $lis = $(this.$lessonList).children(":not(.lmCalcWidth)");
+            $lis.each(function( i, li ) {
+                if($(li).find("strike").length){
+                    console.log("Found Strike?")
+                    return;
+                }
+                //$(li).
+            });
+        },
+        /* Loads up the next step */
+        step: function( step ) {
+            //Create list elements for step info
+            var $li = document.createElement("li");
+            $li.innerHTML = this.createCodeTags( step.text );
             $li.style.display = "none";
+            
+            //this.strikeSteps();
             $(this.$lessonList).children().last().wrap("<strike>");
+            
             this.$lessonList.append($li);
             $($li).fadeIn().effect("highlight");
             this.contractSteps();
             this.current++;
             
-            editorWatcher.focus(step.editor);
+            editorWatcher.focus( step.editor );
             editorWatcher.current = step.editor;
             
             if( step.editorText ) {
                 var _this = this;
                 $.get(step.editorText, function (data) {
-                    step.editorText = _this.setEditorText(step.editor, data, false)
+                    step.editorText = _this.setEditorText(step.editor, data, false);
+					step._init_info = _this.generateInitInfo();
                     }, "text");
             } else if( ('gotoText' in step) && step['gotoText'] ) {
                 /* Jump to position in editor */
@@ -244,13 +290,14 @@ function tutorialStart()
                     }
                 }
             }
-            /* Handle settting text in other tutorials */
+            /* Handle setting text in other tutorials */
             if( ('otherText' in step) && step['otherText'] ) {
                 var _this = this;
                 for( k in step['otherText'] ) {
                     (function(n) {
                         $.get(step['otherText'][n], function(data){
                             step['otherText'][n] = _this.setEditorText( n, data, false );
+							step._init_info = _this.generateInitInfo();
                         }, "text");
                     })(k);
                 }
@@ -278,17 +325,35 @@ function tutorialStart()
             /* Allows user to skip : note if completion function is false this will force allowSkip */
             if( !step.complete || ( ('allowSkip' in step) && step['allowSkip'] ) ) {
                 editorWatcher.allowSkip = true;
-                document.querySelector(".tutorialContent .nextButton").style.display = "block";
+                document.querySelector(".tutorialContent .nextButton").style.visibility = "";
             } else {
                 editorWatcher.allowSkip = false;
-                document.querySelector(".tutorialContent .nextButton").style.display = "none";
+                document.querySelector(".tutorialContent .nextButton").style.visibility = "hidden";
             }
             this.nextStep = false;
             if ( this.current < this.lesson.length ) {
                 this.nextStep = this.lesson[this.current];
             }
+        },
+        generateInitInfo: function() {
+			initInfo = { editors: [] }
+			for( var i = 0; i < document.editorInfo.editors.length; ++i ) {
+				var editor = document.editorInfo.editors[i];
+				var info = {};
+				
+				//Can be undefined
+				var cpos = editor.getCursorPosition();
+				if( cpos.row ) {
+					info.cpos = cpos;
+				} else { info.cpos = false }
+				
+				info.initialContents = editor.getValue();
+				
+				initInfo.editors[i] = info;
+			}
+            return initInfo;
         }
-    }
+    } /* lessonManager{} */
     
     /* Register ace editor watcher function */
     var editorWatcher = {
@@ -406,13 +471,16 @@ function tutorialStart()
             }
             return ""; /* Incomplete */
         }
-    }
-    console.log("tutorialStart");
+    } /* editorWatcher{} */
+    
+    
     editorWatcher.init();
+    
     var num = false;
     if( window.location.hash ) {
         num = /[0-9]/.exec( window.location.hash );
     }
+    
     if( num ) {
         if( num == "2" ) {
             lessonManager.init( "/js/tutorials/tutorial02/info.js" );
@@ -433,11 +501,14 @@ window.tutorialStart = tutorialStart;
 </script>
 
 <div class="tutorialContent">
-<h3 class = "lessonName"></h3>
-<ol class="lessonList">
-
-</ol>
-<div class="nextButton">
-    <input type="button" value="Next Step"/>
-</div>
+    <h3 class="lessonName"></h3>
+    <ol class="lessonList"></ol>
+    <div class="lmButtons">
+        <div class="resetButton">
+            <input type="button" value="Reset Editor"/>
+        </div>
+        <div class="nextButton">
+            <input type="button" value="Next Step"/>
+        </div>
+    </div>
 </div>

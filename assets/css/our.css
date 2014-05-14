@@ -10,10 +10,14 @@ div.tutorialContainer{
     height:100%;
     position: relative;
 }
-.tutorialContainer div.nextButton{
+.tutorialContainer div.lmButtons {
+    display: block;
     position: absolute;
-    bottom: 0px;
+    bottom: 5px;
     right: 5px;
+}
+.tutorialContainer div.lmButtons div{
+    display: inline-block;
 }
 .tutorialContainer code.lessonCode{
     background-color: #444444;
