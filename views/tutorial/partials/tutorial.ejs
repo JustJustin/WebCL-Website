@@ -93,9 +93,18 @@ function tutorialStart()
 				
 				document.editorInfo.editors[i].setValue(editor.initialContents);
 				if( editor.cpos ) {
-					document.editorInfo.editors[i].gotoLine(editor.cpos[0], editor.cpos[1], false);
+					(function(a, e){
+						setTimeout( function() {
+							console.log( "gotoline", a, e );
+							document.editorInfo.editors[a].gotoLine(e.cpos.row + 1, e.cpos.column, false);
+							}, 100 
+						);
+					})(i, editor);
+					//document.editorInfo.editors[i].gotoLine(editor.cpos[0], editor.cpos[1], false);
 				}
+				//alert("Set editor" + i);
 			}
+			editorWatcher.focus(step.editor);
         },
         /* Fired when a dom resize even happens on the container div. */
         resizeHandler: function() {
@@ -228,6 +237,7 @@ function tutorialStart()
             //console.log( "Setting editor:"+editor+" "+text);
             document.editorInfo.editors[editor].setValue(text, 1);
             if( cursorPos ) {
+				console.log( "equals?", document.editorInfo.editors[editor].getValue() == text);
                 document.editorInfo.editors[editor].gotoLine(cursorPos[0], cursorPos[1], false);
             }
             if( focus ) {
@@ -286,7 +296,7 @@ function tutorialStart()
                     var pos = step.gotoText[k].exec( editorText );
                     if( pos ) {
                         pos = convertToAcePos( editorText, pos.index );
-                        document.editorInfo.editors[k].gotoLine(pos[0], pos[1], false );
+                        document.editorInfo.editors[k].gotoLine(pos[0], pos[1], false);
                     }
                 }
             }
@@ -296,7 +306,7 @@ function tutorialStart()
                 for( k in step['otherText'] ) {
                     (function(n) {
                         $.get(step['otherText'][n], function(data){
-                            step['otherText'][n] = _this.setEditorText( n, data, false );
+                            step['otherText'][n] = _this.setEditorText( n, data, false);
 							step._init_info = _this.generateInitInfo();
                         }, "text");
                     })(k);
@@ -334,6 +344,7 @@ function tutorialStart()
             if ( this.current < this.lesson.length ) {
                 this.nextStep = this.lesson[this.current];
             }
+			step._init_info = this.generateInitInfo();
         },
         generateInitInfo: function() {
 			initInfo = { editors: [] }
