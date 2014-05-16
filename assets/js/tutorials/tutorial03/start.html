@@ -109,8 +109,9 @@ function resizeCanvas() {
         canvas.expanded = true;
         canvas.style.top = Math.ceil($(canvas).position().top+1)+"px";
         $(canvas).addClass("bigCanvas");
-        canvas.width=1366;
-        canvas.height=768;
+		// 640×360, 854×480, 960×540, 1024×576, 1280×720, 1366×768
+        canvas.width=1024;
+        canvas.height=576;
     }
     resizeCanvasHandler();
 }

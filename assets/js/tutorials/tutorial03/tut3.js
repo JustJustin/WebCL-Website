@@ -111,6 +111,10 @@ function runProgram(){
 		if(counter >= 750){
             clearThis = false;
 			clearInterval(looper);
+			var canvas = document.getElementById("glcanvas");
+			if( canvas.expanded ) {
+				return runProgram();
+			} 
             $("#runButton").text("Run Program");
 		}
 	}, 15);
