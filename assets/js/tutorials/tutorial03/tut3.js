@@ -96,8 +96,6 @@ function start() {
 	/** IE/Opera. */
 	window.onmousewheel = document.onmousewheel = wheel;
 
-
-	runProgram();
 }
 
 function runProgram(){
@@ -543,6 +541,6 @@ function wheel(event){
 }
 
 
-//start();
-//document.getElementById("runButton").onclick = runProgram;
+start();
+document.getElementById("runButton").onclick = runProgram;
 
