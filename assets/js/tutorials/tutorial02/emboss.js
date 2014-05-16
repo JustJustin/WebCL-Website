@@ -129,6 +129,9 @@ function runProgram () {
     canvasImgCtx.putImageData (pixels, 0, 0);
 
     output.innerHTML += "<br>Done.";
+    
+    // Release all WebCL resources
+	webcl.releaseAll();
   } catch(e) {
     document.getElementById("output").innerHTML += 
       "<h3>ERROR:</h3><pre style=\"color:red;\">" + e.message + "</pre>";
