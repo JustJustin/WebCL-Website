@@ -10,19 +10,28 @@ var lastSquareUpdateTime = 0.0;
 var hPobj;
 var hCobj;
 var hVobj;
+
 var dPobj;
 var dCobj;
 var dVobj;
-var dSobj;
+
 
 var aPobj;
 var aCobj;
 var aVobj;
 
+var aSPobj = [];
+var hSPobj;
+
+var aSCobj = [];
+var hSCobj;
+
+var sphereVertices;
+
 var NUM_PARTICLES = 32*1024;
 
-var V_MIN = -100.0;
-var V_MAX =  100.0;
+var V_MIN = -50.0;
+var V_MAX =  50.0;
 
 var X_MIN = -100;
 var X_MAX =  100;
@@ -53,9 +62,11 @@ function run(){
 	drawScene();
 }
 
-function setup() {
+function start() {
 	var canvas = document.getElementById("glcanvas");
 
+	//$("#glcanvas").addClass("webgl_hide");
+	
 	gl = initWebGL(canvas);      // Initialize the GL context
 
 	// Only continue if WebGL is available and working
@@ -75,13 +86,23 @@ function setup() {
 	
 	init();
 	
-	$("#glcanvas").addClass("webgl_hide");
+	genSphere(20, 20, 400);
+	
+	/** Initialization code. 
+	 * If you use your own event management code, change it as required.
+	 */
+	if (window.addEventListener)
+			/** DOMMouseScroll is for mozilla. */
+			window.addEventListener('DOMMouseScroll', wheel, false);
+	/** IE/Opera. */
+	window.onmousewheel = document.onmousewheel = wheel;
 
+	runProgram();
 }
 
 function runProgram(){
 
-	$("#glcanvas").addClass("webgl_output").removeClass("webgl_hide");
+	//$("#glcanvas").addClass("webgl_output").removeClass("webgl_hide");
 
 	resetParticles();
 	cmdQueue.finish();
@@ -94,7 +115,7 @@ function runProgram(){
 		run();
 		if(counter >= 750){
 			clearInterval(looper);
-			$("#glcanvas").addClass("webgl_hide").removeClass("webgl_output");
+			//$("#glcanvas").addClass("webgl_hide").removeClass("webgl_output");
 		}
 	
 	}, 15);
@@ -103,6 +124,53 @@ function runProgram(){
 	
 }
 
+function genPoint(i, j, m, n, r){
+	aSPobj.push(r * (Math.sin(Math.PI * ((j) / m)) * Math.cos(2 * Math.PI * ((i) / n))));
+	aSPobj.push(r * Math.sin(Math.PI * ((j) / m)) * Math.sin(2 * Math.PI * ((i) / n)));
+	aSPobj.push(r * Math.cos(Math.PI * ((j) / m)));
+	aSPobj.push(1.0);
+	
+	aSCobj.push(1.0);
+	aSCobj.push(0.0);
+	aSCobj.push(0.0);
+	aSCobj.push(1.0);
+}
+
+
+
+//Create a sphere from long. (m) and lang. (n) parameters
+function genSphere(m, n, r)
+{
+	for (var i = 0; i < n; ++i){
+		for (var j = 1; j <= m; ++j){
+
+			genPoint(i + 1, j, m, n, r);
+
+			genPoint(i, j, m, n, r);
+
+			genPoint(i, j - 1, m, n, r);
+
+			genPoint(i + 1, j - 1, m, n, r);
+
+			genPoint(i + 1, j, m, n, r);
+
+			genPoint(i, j - 1, m, n, r);
+		}
+	}
+
+	sphereVertices = aSPobj.length;
+
+
+	hSPobj = gl.createBuffer();
+	hSCobj = gl.createBuffer();
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, hSPobj);
+	gl.bufferData(gl.ARRAY_BUFFER, aSPobj, gl.STATIC_DRAW);
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, hSCobj);
+	gl.bufferData(gl.ARRAY_BUFFER, aSCobj, gl.STATIC_DRAW);
+	
+}
 
 function initWebGL(canvas) {
 	gl = null;
@@ -145,10 +213,8 @@ function initShaders() {
 	gl.useProgram(shaderProgram);
 
 	vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-	gl.enableVertexAttribArray(vertexPositionAttribute);
-	
 	vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-	gl.enableVertexAttribArray(vertexColorAttribute);
+	
 }
 
 
@@ -226,31 +292,6 @@ function resetParticles(){
 
 }
 
-function initBuffers() {
-	squareVerticesBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
-
-	var vertices = [
-	1.0,  1.0,  0.0, 1.0,
-	-1.0, 1.0,  0.0, 1.0, 
-	1.0,  -1.0, 0.0, 1.0,
-	-1.0, -1.0, 0.0, 1.0
-	];
-
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-	
-	var colors = [
-	1.0,  1.0,  1.0,  1.0,    // white
-	1.0,  0.0,  0.0,  1.0,    // red
-	0.0,  1.0,  0.0,  1.0,    // green
-	0.0,  0.0,  1.0,  1.0     // blue
-	];
-
-	squareVerticesColorBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-}
-
 function init(){
 
 	// 1. Get WebCl Context
@@ -302,8 +343,8 @@ function init(){
 	// Create kernel and set arguments
 	kernel = program.createKernel ("Particle");
 	kernel.setArg (0, dPobj);
-	kernel.setArg (1, dCobj);
-	kernel.setArg (2, dVobj);
+	kernel.setArg (1, dVobj);
+	kernel.setArg (2, dCobj);
 	
 	cmdQueue = ctx.createCommandQueue (device);
 	
@@ -325,7 +366,7 @@ function webcl_cleanup(){
 function drawScene() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	perspectiveMatrix = makePerspective(45, 1366.0/768.0, 0.1, 2000.0);
+	perspectiveMatrix = makePerspective(45, 1366.0/768.0, 0.1, 4000.0);
 
 	mvMatrix = makeLookAt( 0., -100., eyeZ,     0., -100., 0.,     0., 1., 0. );
 	
@@ -333,21 +374,27 @@ function drawScene() {
 	gl.bindBuffer(gl.ARRAY_BUFFER, hPobj);
 	gl.bufferData(gl.ARRAY_BUFFER, aPobj, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(vertexPositionAttribute, 4, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(vertexPositionAttribute);
 	gl.bindBuffer(gl.ARRAY_BUFFER, hCobj);
 	gl.bufferData(gl.ARRAY_BUFFER, aCobj, gl.STATIC_DRAW);
 	gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(vertexColorAttribute);
+	
 	setMatrixUniforms();
 	
 	gl.drawArrays(gl.POINTS, 0, NUM_PARTICLES);
 	
-	var currentTime = (new Date).getTime();
-	if (lastSquareUpdateTime) {
-		var delta = currentTime - lastSquareUpdateTime;
-  	
-		squareRotation += (30 * delta) / 1000.0;
-	}
-  
-	lastSquareUpdateTime = currentTime;
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, hSPobj);
+	gl.vertexAttribPointer(vertexPositionAttribute, 4, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(vertexPositionAttribute);
+	gl.bindBuffer(gl.ARRAY_BUFFER, hSCobj);
+	gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(vertexColorAttribute);
+	
+	setMatrixUniforms();
+	
+	gl.drawArrays(gl.TRIANGLES, 0, sphereVertices);
 	
 }
 
@@ -356,7 +403,7 @@ function animateScene(){
 	// load data into arrays from WebGL 
 
 
-	var bufSize = 4 *  NUM_PARTICLES * 4;
+	var bufSize = 4 * NUM_PARTICLES * 4; //size in bytes hence times 4 again
 	
 	cmdQueue.enqueueWriteBuffer(dPobj, false, 0, bufSize, aPobj);
 	cmdQueue.enqueueWriteBuffer(dVobj, false, 0, bufSize, aVobj);
@@ -485,37 +532,7 @@ function wheel(event){
 	event.returnValue = false;
 }
 
-/** Initialization code. 
- * If you use your own event management code, change it as required.
- */
-if (window.addEventListener)
-        /** DOMMouseScroll is for mozilla. */
-        window.addEventListener('DOMMouseScroll', wheel, false);
-/** IE/Opera. */
-window.onmousewheel = document.onmousewheel = wheel;
 
+//start();
+//document.getElementById("runButton").onclick = runProgram;
 
-// Trackball functions
-
-function hemisphereMap(x, y){
-	var xAdj = (2 * x - screenWidth) / screenWidth;
-	var yAdj = (screenHeight - 2 * y) / screenHeight;
-	var len = sqrt(xAdj*xAdj + yAdj*yAdj);
-	len = (len < 1.0) ? len : 1.0;
-	return toUnitVector($V[xAdj, yAdj, sqrt(1.001 - len * len)]);
-}
-
-function rotate(x0, y0, x1, y1, speed){
-	var init = hemisphereMap(x0, y0);
-	var fin = hemisphereMap(x1, y1);
-
-	var n = cross(init, fin);
-
-	var axis = toUnitVector(n);
-	var angle = speed * modulus(n);
-
-	mvRotate( mag, axis);
-}
-
-document.getElementById("runButton").onclick = runProgram;
-setup();

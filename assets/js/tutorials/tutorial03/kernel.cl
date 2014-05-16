@@ -33,6 +33,17 @@
 			return false;
 	}
 	
+	vector
+	GravitySphere (point p, float m1, sphere s, float m2)
+	{
+		float r = fast_distance( (float3)( p.x, p.y, p.z ), (float3)( s.x, s.y, s.z ));
+		vector d = p - s;
+		float co = 6.67E-11 * r * m1 * m2;
+		d = -co *  d;
+		d.w = 1;
+		return d;
+	}
+	
 	
 	kernel void Particle (global point *dPobj, global vector *dVobj, global color *dCobj) {
 	
@@ -43,8 +54,15 @@
 		vector v = dVobj[gid];
 		color  c = dCobj[gid];
 		
-		point pp = p + DT * v + .5f * DT * DT * G;
-		vector vp = v + DT * G;
+
+		
+		//vector force = GravitySphere(p, .000005, Sphere1, 5000.0);
+		
+		vector a = G;
+		//vector a = (1/.000005f) * force;
+		
+		point pp = p + DT * v + .5f * DT * DT * a;
+		vector vp = v + DT * a;
 		
 		pp.w = 1.;
 		vp.w = 0.;
@@ -53,7 +71,7 @@
 		if( IsInsideSphere( pp, Sphere1 ) )
 		{
 			vp = BounceSphere( p, v, Sphere1 );
-			pp = p + DT * vp + .5f*DT*DT*G;
+			pp = p + DT * vp + .5f*DT*DT*a;
 		}
 		
 		dPobj[gid] = pp;
