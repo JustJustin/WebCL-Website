@@ -1,7 +1,7 @@
 kernel void clEdge(global const uchar4* src,
-			global uchar4* dst,
-			uint width,
-			uint height)
+						global uchar4* dst,
+						uint width,
+						uint height)
 {
 	const float3 LUMCOEFFS = (0.2125, 0.7154, 0.0721);
 

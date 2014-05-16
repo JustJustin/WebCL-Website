@@ -44,7 +44,7 @@ function runProgram () {
 
 	try {
 		// First check if the WebCL extension is installed at all
-		if (window.webcl == undefined) {
+		if (window.webcl === undefined) {
 			alert("Unfortunately your system does not support WebCL. " +
 				"Make sure that you have both the OpenCL driver " +
 				"and the WebCL browser extension installed.");

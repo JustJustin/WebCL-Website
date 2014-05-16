@@ -37,6 +37,7 @@ function setupCanvas (canvasId, srcId) {
 }
 
 function runProgram () {
+	var i;
 	// All output is written to element by id "output"
 	var output = document.getElementById("outputText");
 	output.innerHTML = "";
@@ -109,11 +110,11 @@ function runProgram () {
 		Math.ceil (height / localWS[1]) * localWS[1]];
 
 		output.innerHTML += "<br>work group dimensions: 2";
-		for (var i = 0; i < 2; ++i) {
+		for (i = 0; i < 2; ++i) {
 			output.innerHTML += "<br>global work item size[" +
 				i + "]: " + globalWS[i];
 		}
-		for (var i = 0; i < 2; ++i) {
+		for (i = 0; i < 2; ++i) {
 			output.innerHTML += "<br>local work item size[" +
 				i + "]: " + localWS[i];
 		}

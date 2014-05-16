@@ -1,7 +1,7 @@
 kernel void clDesaturate(global const uchar4* src,
-			global uchar4* dst,
-			uint width,
-			uint height)
+						global uchar4* dst,
+						uint width,
+						uint height)
 {
 	int x = get_global_id(0);
 	int y = get_global_id(1);
