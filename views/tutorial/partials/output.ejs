@@ -16,16 +16,28 @@
 
 
 <script type="text/javascript">
+var _sp_run = false;
+var _sp_clean_func = false;
 function setup_buttons() {
-	$("#loadButton").button().click(function(event){
-		event.preventDefault();
-		//$("#addJS").text(document.editorInfo.editors[0].getValue());		
-		$("#clKernel").text(document.editorInfo.editors[1].getValue());
-		$("#output").html(document.editorInfo.editors[2].getValue());
-		eval(document.editorInfo.editors[0].getValue());
-	});
+    $("#loadButton").button().click(function(event){
+        event.preventDefault();
+        //$("#addJS").text(document.editorInfo.editors[0].getValue());        
+        $("#clKernel").text(document.editorInfo.editors[1].getValue());
+        $("#output").html(document.editorInfo.editors[2].getValue());
+        if( _sp_run==true && (typeof _sp_clean_func == "function") ) {
+            _sp_clean_func();
+        }
+        
+        eval(document.editorInfo.editors[0].getValue());
+        if( typeof webcl_cleanup == "function" ) {
+            console.log( "webcl_cleanup found" );
+            _sp_clean_func = webcl_cleanup;
+            _sp_run = true;
+        } else { //This might not be needed
+            _sp_run = false;
+        }
+    });
 };
-
 
 $( document ).ready(setup_buttons);
 </script>

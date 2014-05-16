@@ -34,15 +34,19 @@ var Z_MAX =  100;
 
 var horizAspect = 480.0/640.0;
 
-var cmdQueue;
-var kernel;
+
 
 
 var eyeZ = 800.0;
 
 // For dealing with the trackball motion
 
-
+//webcl variables
+var webcl;
+var ctx;
+var program;
+var cmdQueue;
+var kernel;
 
 function run(){
 	animateScene();
@@ -257,6 +261,7 @@ function init(){
 		throw {message:"This device does not support webcl"};
 	}
 
+	
 	// 2. Create WebGL Buffers and load data
 
 	hPobj = gl.createBuffer();			
@@ -268,7 +273,7 @@ function init(){
 	// 3. Create WebCL buffers from WebGl buffers
 	
 	// Setup WebCL context using the default device
-	var ctx = webcl.createContext ();
+	ctx = webcl.createContext ();
 	
 	var bufSize = 4 *  NUM_PARTICLES * 4;
 	
@@ -279,7 +284,7 @@ function init(){
 	// 4. Do WebCl Kernel Stuff
 	
 	var kernelSrc = loadKernel("clKernel");
-	var program = ctx.createProgram(kernelSrc);
+	program = ctx.createProgram(kernelSrc);
 	var device = ctx.getInfo(WebCL.CONTEXT_DEVICES)[0];
 
 	try {
@@ -303,6 +308,17 @@ function init(){
 	cmdQueue = ctx.createCommandQueue (device);
 	
 	
+}
+
+function webcl_cleanup(){
+
+	kernel.release();
+	program.release();
+	cmdQueue.release();
+	dPobj.release();
+	dVobj.release();
+	dCobj.release();
+
 }
 
 
@@ -422,12 +438,12 @@ function getWebCL() {
 function loadKernel(id) {
   var kernelElement = document.getElementById(id);
   var kernelSource = kernelElement.text;
-  if (kernelElement.src !== "") {
-      var mHttpReq = new XMLHttpRequest();
-      mHttpReq.open("GET", kernelElement.src, false);
-      mHttpReq.send(null);
-      kernelSource = mHttpReq.responseText;
-  }
+  // if (kernelElement.src !== "") {
+      // var mHttpReq = new XMLHttpRequest();
+      // mHttpReq.open("GET", kernelElement.src, false);
+      // mHttpReq.send(null);
+      // kernelSource = mHttpReq.responseText;
+  // }
   return kernelSource;
 }
 

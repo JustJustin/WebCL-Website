@@ -58,7 +58,7 @@
 		
 		dPobj[gid] = pp;
 		dVobj[gid] = vp;
-		dCobj[gid] = (float4)(normalize(vp.xyz), 1.0);
+		dCobj[gid] = c;
 	}
 	
 	
