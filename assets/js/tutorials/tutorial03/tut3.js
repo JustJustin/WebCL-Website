@@ -99,7 +99,7 @@ function runProgram(){
 		if(counter >= 750){
             clearThis = false;
 			clearInterval(looper);
-            $("runButton").text("Run Program");
+            $("#runButton").text("Run Program");
 		}
 	}, 15);
     clearThis = looper;
