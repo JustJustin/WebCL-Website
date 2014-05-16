@@ -71,7 +71,7 @@ function runProgram() {
 	
 	init();
 	
-	handler(run, 100, 17);
+	setInterval(run, 17);
 }
 
 function initWebGL(canvas) {
@@ -280,7 +280,7 @@ function init(){
 function drawScene() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	perspectiveMatrix = makePerspective(45, 1366.0/768.0, 0.1, 2000.0);
+	perspectiveMatrix = makePerspective(45,1, 0.1, 2000.0);
 
 	mvMatrix = makeLookAt( 0., -100., eyeZ,     0., -100., 0.,     0., 1., 0. );
 	
@@ -471,3 +471,5 @@ function rotate(x0, y0, x1, y1, speed){
 
 	mvRotate( mag, axis);
 }
+
+document.getElementById("runButton").onclick = runProgram;

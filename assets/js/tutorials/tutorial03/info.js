@@ -11,7 +11,7 @@ var tutorial_data =
             complete: function(code, user, output) {
                 return false;
             },
-            lock: true,
+            lock: false,
             forceFocus: false,
 			allowSkip: true
         }
