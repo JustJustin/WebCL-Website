@@ -1,0 +1,35 @@
+<script src="sylvester.js" type="text/javascript"></script>
+<script src="glUtils.js" type="text/javascript"></script>
+<script src="t.js" type="text/javascript"></script>
+
+
+<canvas id="glcanvas" width="1366" height="768">
+Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+</canvas>
+
+
+<script id="shader-fs" type="x-shader/x-fragment">
+	varying lowp vec4 vColor;
+	
+  void main(void) {
+	gl_FragColor = vColor;
+  }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+  attribute vec4 aVertexPosition;
+  attribute vec4 aVertexColor;
+
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
+  
+  varying lowp vec4 vColor;
+
+  void main(void) {
+	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
+	gl_PointSize = 1.;
+	vColor = aVertexColor;
+  }
+</script>
+	
+

@@ -37,7 +37,8 @@ npm-debug.log
 .netbeans
 nbproject
 .idea
-
+tags.idx
+tags
 
 ########################
 # local config
