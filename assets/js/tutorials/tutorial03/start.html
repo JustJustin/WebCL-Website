@@ -44,7 +44,7 @@ $(canvas).resize(resizeCanvasHandler);
 </script>
 
 
-<script id="shader-fs" type="x-shader/x-fragment">
+<script id="shader-fs-particle" type="x-shader/x-fragment">
 	varying lowp vec4 vColor;
 	
   void main(void) {
@@ -52,7 +52,7 @@ $(canvas).resize(resizeCanvasHandler);
   }
 </script>
 
-<script id="shader-vs" type="x-shader/x-vertex">
+<script id="shader-vs-particle" type="x-shader/x-vertex">
   attribute vec4 aVertexPosition;
   attribute vec4 aVertexColor;
 
@@ -63,8 +63,27 @@ $(canvas).resize(resizeCanvasHandler);
 
   void main(void) {
 	gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
-	gl_PointSize = 1.;
+	gl_PointSize = 2.;
 	vColor = aVertexColor;
+  }
+</script>
+
+<script id="shader-fs-sphere" type="x-shader/x-fragment">
+	uniform lowp vec4 vColor;
+	
+	void main(void) {
+		gl_FragColor = vColor;
+  }
+</script>
+
+<script id="shader-vs-sphere" type="x-shader/x-vertex">
+  attribute vec3 aVertexPosition;
+
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
+
+  void main(void) {
+	gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
   }
 </script>
 

@@ -1,11 +1,4 @@
 var gl; // A global variable for the WebGL context
-var vertexPositionAttribute;
-var shaderProgram;
-var squareVerticesBuffer;
-var squareVerticesColorBuffer;
-var squareRotation = 0.0;
-var lastSquareUpdateTime = 0.0;
-
 
 var hPobj;
 var hCobj;
@@ -15,18 +8,15 @@ var dPobj;
 var dCobj;
 var dVobj;
 
-
 var aPobj;
 var aCobj;
 var aVobj;
 
-var aSPobj = [];
-var hSPobj;
+var shaderProgramSphere;
+var shaderProgramParticle;
 
-var aSCobj = [];
-var hSCobj;
-
-var sphereVertices;
+var spherePositionBuffer;
+var sphereIndexBuffer;
 
 var NUM_PARTICLES = 32*1024;
 
@@ -42,7 +32,7 @@ var Z_MAX =  100;
 
 var horizAspect = 480.0/640.0;
 
-var eyeZ = 800.0;
+var eyeZ = 900.0;
 
 // For dealing with the trackball motion
 
@@ -85,7 +75,7 @@ function start() {
 	
 	init();
 	
-	genSphere(20, 20, 400);
+	genSphere(40, 40, 600);
 	
 	/** Initialization code. 
 	 * If you use your own event management code, change it as required.
@@ -127,53 +117,7 @@ function runProgram(){
     clearThis = looper;
 }
 
-function genPoint(i, j, m, n, r){
-	aSPobj.push(r * (Math.sin(Math.PI * ((j) / m)) * Math.cos(2 * Math.PI * ((i) / n))));
-	aSPobj.push(r * Math.sin(Math.PI * ((j) / m)) * Math.sin(2 * Math.PI * ((i) / n)));
-	aSPobj.push(r * Math.cos(Math.PI * ((j) / m)));
-	aSPobj.push(1.0);
-	
-	aSCobj.push(1.0);
-	aSCobj.push(0.0);
-	aSCobj.push(0.0);
-	aSCobj.push(1.0);
-}
 
-
-
-//Create a sphere from long. (m) and lang. (n) parameters
-function genSphere(m, n, r)
-{
-	for (var i = 0; i < n; ++i){
-		for (var j = 1; j <= m; ++j){
-
-			genPoint(i + 1, j, m, n, r);
-
-			genPoint(i, j, m, n, r);
-
-			genPoint(i, j - 1, m, n, r);
-
-			genPoint(i + 1, j - 1, m, n, r);
-
-			genPoint(i + 1, j, m, n, r);
-
-			genPoint(i, j - 1, m, n, r);
-		}
-	}
-
-	sphereVertices = aSPobj.length;
-
-
-	hSPobj = gl.createBuffer();
-	hSCobj = gl.createBuffer();
-	
-	gl.bindBuffer(gl.ARRAY_BUFFER, hSPobj);
-	gl.bufferData(gl.ARRAY_BUFFER, aSPobj, gl.STATIC_DRAW);
-	
-	gl.bindBuffer(gl.ARRAY_BUFFER, hSCobj);
-	gl.bufferData(gl.ARRAY_BUFFER, aSCobj, gl.STATIC_DRAW);
-	
-}
 
 function initWebGL(canvas) {
 	gl = null;
@@ -193,31 +137,108 @@ function initWebGL(canvas) {
 	return gl;
 }
 
+function genSphere(latitude, longitude, radius)
+{
 
+	spherePositionBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
+	sphereIndexBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereIndexBuffer);
+
+	var spherePositionArray = [];
+	var sphereColorArray = [];
+	var sphereIndexArray = [];
+	
+	for (var lat=0; lat <= latitude; lat++){
+		var theta = lat * Math.PI / latitude;
+		var sinTheta = Math.sin(theta);
+		var cosTheta = Math.cos(theta);
+		
+		for( var lon = 0; lon <= longitude; lon++){
+			var phi = lon * 2 * Math.PI / longitude;
+            var sinPhi = Math.sin(phi);
+            var cosPhi = Math.cos(phi);
+
+            var x = cosPhi * sinTheta;
+            var y = cosTheta;
+            var z = sinPhi * sinTheta;
+			
+            spherePositionArray.push(radius * x);
+            spherePositionArray.push(radius * y);
+            spherePositionArray.push(radius * z);
+	
+		}
+	}
+	
+	for (var lat=0; lat < latitude; lat++){
+		
+		for( var lon = 0; lon < longitude; lon++){
+		
+			var first = (lat * (longitude + 1)) + lon;
+            var second = first + longitude + 1;
+            sphereIndexArray.push(first);
+            sphereIndexArray.push(second);
+            sphereIndexArray.push(first + 1);
+
+            sphereIndexArray.push(second);
+            sphereIndexArray.push(second + 1);
+            sphereIndexArray.push(first + 1);
+		}
+	}
+		
+		
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(spherePositionArray), gl.STATIC_DRAW);
+	spherePositionBuffer.itemSize = 3;
+	spherePositionBuffer.numItems = spherePositionArray.length / 3;
+
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(sphereIndexArray), gl.STATIC_DRAW);
+	sphereIndexBuffer.itemSize = 1;
+	sphereIndexBuffer.numItems = sphereIndexArray.length;
+
+}
 
 
 function initShaders() {
-	var fragmentShader = getShader(gl, "shader-fs");
-	var vertexShader = getShader(gl, "shader-vs");
+	var fragmentShader = getShader(gl, "shader-fs-sphere");
+	var vertexShader = getShader(gl, "shader-vs-sphere");
 
 	// Create the shader program
 
-	shaderProgram = gl.createProgram();
-	gl.attachShader(shaderProgram, vertexShader);
-	gl.attachShader(shaderProgram, fragmentShader);
-	gl.linkProgram(shaderProgram);
+	shaderProgramSphere = gl.createProgram();
+	gl.attachShader(shaderProgramSphere, vertexShader);
+	gl.attachShader(shaderProgramSphere, fragmentShader);
+	gl.linkProgram(shaderProgramSphere);
 
 	// If creating the shader program failed, alert
 
-	if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+	if (!gl.getProgramParameter(shaderProgramSphere, gl.LINK_STATUS)) {
 		alert("Unable to initialize the shader program.");
 	}
 
-	gl.useProgram(shaderProgram);
+	gl.useProgram(shaderProgramSphere);
 
-	vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-	vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-	
+	shaderProgramSphere.vertexPositionAttribute = gl.getAttribLocation(shaderProgramSphere, "aVertexPosition");
+
+	fragmentShader = getShader(gl, "shader-fs-particle");
+	vertexShader = getShader(gl, "shader-vs-particle");
+
+	// Create the shader program
+
+	shaderProgramParticle = gl.createProgram();
+	gl.attachShader(shaderProgramParticle, vertexShader);
+	gl.attachShader(shaderProgramParticle, fragmentShader);
+	gl.linkProgram(shaderProgramParticle);
+
+	// If creating the shader program failed, alert
+
+	if (!gl.getProgramParameter(shaderProgramParticle, gl.LINK_STATUS)) {
+		alert("Unable to initialize the shader program.");
+	}
+
+	gl.useProgram(shaderProgramParticle);
+
+	shaderProgramParticle.vertexPositionAttribute = gl.getAttribLocation(shaderProgramParticle, "aVertexPosition");
+	shaderProgramParticle.vertexColorAttribute = gl.getAttribLocation(shaderProgramParticle, "aVertexColor");
 }
 
 
@@ -288,10 +309,16 @@ function resetParticles(){
 	
 	gl.bindBuffer(gl.ARRAY_BUFFER, hPobj);
 	gl.bufferData(gl.ARRAY_BUFFER, aPobj, gl.STATIC_DRAW);
+	hPobj.itemSize = 4;
+	hPobj.numItems = aPobj.length / 4;
 	gl.bindBuffer(gl.ARRAY_BUFFER, hVobj);
 	gl.bufferData(gl.ARRAY_BUFFER, aVobj, gl.STATIC_DRAW);
+	hVobj.itemSize = 4;
+	hVobj.numItems = aVobj.length / 4;
 	gl.bindBuffer(gl.ARRAY_BUFFER, hCobj);
 	gl.bufferData(gl.ARRAY_BUFFER, aCobj, gl.STATIC_DRAW);
+	hCobj.itemSize = 4;
+	hCobj.numItems = aCobj.length / 4;
 
 }
 
@@ -378,31 +405,39 @@ function drawScene() {
 
 	mvMatrix = makeLookAt( 0., -100., eyeZ,     0., -100., 0.,     0., 1., 0. );
 	
-
+	gl.useProgram(shaderProgramParticle);
+	
+	
 	gl.bindBuffer(gl.ARRAY_BUFFER, hPobj);
 	gl.bufferData(gl.ARRAY_BUFFER, aPobj, gl.STATIC_DRAW);
-	gl.vertexAttribPointer(vertexPositionAttribute, 4, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vertexPositionAttribute);
+	gl.vertexAttribPointer(shaderProgramParticle.vertexPositionAttribute, hPobj.itemSize, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(shaderProgramParticle.vertexPositionAttribute);
 	gl.bindBuffer(gl.ARRAY_BUFFER, hCobj);
 	gl.bufferData(gl.ARRAY_BUFFER, aCobj, gl.STATIC_DRAW);
-	gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vertexColorAttribute);
+	gl.vertexAttribPointer(shaderProgramParticle.vertexColorAttribute, hCobj.itemSize, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(shaderProgramParticle.vertexColorAttribute);
 	
-	setMatrixUniforms();
+	setMatrixUniforms(shaderProgramParticle);
 	
-	gl.drawArrays(gl.POINTS, 0, NUM_PARTICLES);
+	gl.drawArrays(gl.POINTS, 0, hPobj.numItems);
 	
+	gl.useProgram(shaderProgramSphere);
 	
-	gl.bindBuffer(gl.ARRAY_BUFFER, hSPobj);
-	gl.vertexAttribPointer(vertexPositionAttribute, 4, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vertexPositionAttribute);
-	gl.bindBuffer(gl.ARRAY_BUFFER, hSCobj);
-	gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vertexColorAttribute);
+	mvPushMatrix();
 	
-	setMatrixUniforms();
+	mvTranslate([-100., -800., 0.]);
 	
-	gl.drawArrays(gl.TRIANGLES, 0, sphereVertices);
+	gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
+	gl.vertexAttribPointer(shaderProgramSphere.vertexPositionAttribute, spherePositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(shaderProgramSphere.vertexPositionAttribute);
+	
+	setMatrixUniforms(shaderProgramSphere);
+	var cUniform = gl.getUniformLocation(shaderProgramSphere, "vColor");
+	gl.uniform4f(cUniform, 1.0, 1.0, 0.0, 1.0);
+	
+	gl.drawElements(gl.LINE_STRIP, sphereIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	
+	mvPopMatrix();
 	
 }
 
@@ -443,11 +478,11 @@ function mvTranslate(v) {
   multMatrix(Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4());
 }
 
-function setMatrixUniforms() {
-  var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+function setMatrixUniforms(program) {
+  var pUniform = gl.getUniformLocation(program, "uPMatrix");
   gl.uniformMatrix4fv(pUniform, false, new Float32Array(perspectiveMatrix.flatten()));
 
-  var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+  var mvUniform = gl.getUniformLocation(program, "uMVMatrix");
   gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
 }
 
@@ -508,7 +543,7 @@ function loadKernel(id) {
  * It must react to delta being more/less than zero.
  */
 function handle(delta) {
-        eyeZ += delta * -25.0;
+        eyeZ += delta * -50.0;
 }
 
 /** Event handler for mouse wheel event.
