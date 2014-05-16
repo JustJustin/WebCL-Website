@@ -490,10 +490,14 @@ function tutorialStart()
     
     editorWatcher.init();
     
-    var num = false;
-    if( window.location.hash ) {
-        num = /[0-9]/.exec( window.location.hash );
+    function getParameterByName(name) {
+        var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+        return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
     }
+    
+    var num = false;
+    num = getParameterByName("lesson");
+    console.log("num",num);
     
     if( num ) {
         if( num == "3" ) {
