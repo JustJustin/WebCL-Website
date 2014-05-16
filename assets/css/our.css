@@ -125,16 +125,21 @@ body, html {
     width: 30%;
 }
 
-.webgl_hide{
-   position: absolute !important;
-   top: -9999px !important;
-   left: -9999px !important;
-}
 
-.webgl_output{
-	position: absolute;
-	top: 0px;
-	right: 40px;
-	z-index: 100;
-	background: black;
+/****
+ * WebGL Canvases
+ ***/
+.webglSide{
+    position:relative;
+    background: none repeat scroll 0 0 #000000;
+    z-index: 50;
+}
+#glcanvas.bigCanvas{
+    position: absolute;
+    right: 3px;
+}
+#output button{
+    z-index: 100;
+    position: relative;
+    top: 3px;
 }

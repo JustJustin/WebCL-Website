@@ -4,11 +4,47 @@
 <script src="sylvester.js" type="text/javascript"></script>
 <script src="glUtils.js" type="text/javascript"></script>
 
-<body onload="start();">
-<canvas id="glcanvas" width="1366" height="768">
+
+<canvas id="glcanvas" class="webglSide">
 Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
 </canvas>
-</body>
+
+<script type="text/javascript">
+function resizeCanvasHandler(el) {
+    var canvas = document.getElementById("glcanvas");
+    canvas.getContext("webgl").viewport(0, 0, $(canvas).width(), $(canvas).height());
+    console.log("resizeCanvasHandler", $(canvas).width(), $(canvas).height());
+}
+function setCanvasSize() {
+    var canvas = document.getElementById("glcanvas");
+    var holder = $(canvas).parents("div.outputContainer");
+    
+    if( canvas.expanded ) { 
+        return; 
+    }
+    
+    var width = holder.width() - 3;
+    var height = Math.floor( width / (16/9) );
+    
+    //Change to run only when it needs to.
+    
+    canvas.width = width;
+    canvas.height = height;
+}
+setCanvasSize();
+
+var canvas = document.getElementById("glcanvas");
+var holder = $(canvas).parents("div.outputContainer").first();
+
+if( !window.ourresize ) {
+    window.ourresize = true;
+    $(window).resize(setCanvasSize);
+}
+
+holder.resize(setCanvasSize);
+$(canvas).resize(resizeCanvasHandler);
+</script>
+
 
 <script id="shader-fs" type="x-shader/x-fragment">
 	varying lowp vec4 vColor;
@@ -119,5 +155,39 @@ Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> ele
 </script>
 
 <button id="runButton" >Run Program</button>
-	
+<button id="expandButton">Expand</button>
 
+<script style="text/javascript">
+var el = document.getElementById("expandButton");
+var canvas = document.getElementById("glcanvas");
+
+canvas.expanded = false;
+
+function resizeCanvas() {
+    if( canvas.expanded ) {
+        canvas.expanded = false;
+        canvas.style.top = "";
+        $(canvas).removeClass("bigCanvas");
+        setCanvasSize();
+    } else {
+        canvas.expanded = true;
+        canvas.style.top = Math.ceil($(canvas).position().top+1)+"px";
+        $(canvas).addClass("bigCanvas");
+        canvas.width=1366;
+        canvas.height=768;
+    }
+    resizeCanvasHandler();
+}
+
+el.expanded = false;
+$(el).click(function() {
+    resizeCanvas();
+    if( el.expanded ) {
+        el.expanded = false;
+        $(el).text("Expand");
+    } else {
+        el.expanded = true;
+        $(el).text("Contract");
+    }
+});
+</script>
