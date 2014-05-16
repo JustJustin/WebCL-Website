@@ -1,6 +1,6 @@
 function getWebCL() {
 	if (window.webcl === undefined) {
-		if( window.WebCL === undefined ) {
+		if (window.WebCL === undefined) {
 			return false;
 		}
 		return new window.WebCL();
@@ -20,15 +20,13 @@ function loadKernel(id) {
 	return kernelSource;
 }
 
-function setupCanvas (canvasId, srcId) {
+function setupCanvas (canvasId, srcImg) {
 	try {
 		var canvasImg = document.getElementById(canvasId);
 		var canvasImgCtx = canvasImg.getContext("2d");
-		var srcImg = document.getElementById(srcId);
 		canvasImg.width = srcImg.width;
 		canvasImg.height = srcImg.height;
 		canvasImgCtx.drawImage (srcImg, 0, 0, srcImg.width, srcImg.height);
-		srcImg.setAttribute("style", "display:none;" );
 	} catch(e) {
 		document.getElementById("output").innerHTML +=
 		"<h3>ERROR:</h3><pre style=\"color:red;\">" + e.message + "</pre>";
@@ -44,7 +42,8 @@ function runProgram () {
 
 	try {
 		// First check if the WebCL extension is installed at all
-		if (window.webcl === undefined) {
+		var webcl = getWebCL();
+		if (!webcl) {
 			alert("Unfortunately your system does not support WebCL. " +
 				"Make sure that you have both the OpenCL driver " +
 				"and the WebCL browser extension installed.");
@@ -134,8 +133,10 @@ function runProgram () {
 		// Release all WebCL resources
 		webcl.releaseAll();
 	} catch(e) {
+		console.log(e);
+		console.trace();
 		document.getElementById("output").innerHTML +=
-			"<h3>ERROR:</h3><pre style=\"color:red;\">" +
+			"<h3>Error in runProgram():</h3><pre style=\"color:red;\">" +
 			e.message + "</pre>";
 		throw e;
 	}
@@ -143,6 +144,11 @@ function runProgram () {
 	return output.innerHTML;
 }
 
-setupCanvas("canvasImg", "srcImg");
+// Only set up the canvas when the image is loaded.
+var img = new Image();
+img.onload = function () {
+	setupCanvas("canvasImg", this);
+};
+img.src = "js/tutorials/tutorial02/img.png";
 
 document.getElementById("runButton").onclick = runProgram;
