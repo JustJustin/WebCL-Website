@@ -124,3 +124,16 @@ body, html {
 .outputContainer, .tutorialContainer{
     width: 30%;
 }
+
+.webgl_hide{
+   position: absolute !important;
+   top: -9999px !important;
+   left: -9999px !important;
+}
+
+.webgl_output{
+	position: absolute;
+	top: 0px;
+	right: 40px;
+	z-index: 100;
+}

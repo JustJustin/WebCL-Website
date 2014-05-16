@@ -49,7 +49,7 @@ function run(){
 	drawScene();
 }
 
-function runProgram() {
+function setup() {
 	var canvas = document.getElementById("glcanvas");
 
 	gl = initWebGL(canvas);      // Initialize the GL context
@@ -71,8 +71,34 @@ function runProgram() {
 	
 	init();
 	
-	setInterval(run, 17);
+	$("#glcanvas").addClass("webgl_hide");
+
 }
+
+function runProgram(){
+
+	$("#glcanvas").addClass("webgl_output").removeClass("webgl_hide");
+
+	resetParticles();
+	cmdQueue.finish();
+	
+
+	var counter = 0;
+	
+	var looper = setInterval(function(){
+		counter++
+		run();
+		if(counter >= 750){
+			clearInterval(looper);
+			$("#glcanvas").addClass("webgl_hide").removeClass("webgl_output");
+		}
+	
+	}, 15);
+	
+	
+	
+}
+
 
 function initWebGL(canvas) {
 	gl = null;
@@ -91,6 +117,9 @@ function initWebGL(canvas) {
 
 	return gl;
 }
+
+
+
 
 function initShaders() {
 	var fragmentShader = getShader(gl, "shader-fs");
@@ -280,7 +309,7 @@ function init(){
 function drawScene() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	perspectiveMatrix = makePerspective(45,1, 0.1, 2000.0);
+	perspectiveMatrix = makePerspective(45, 1366.0/768.0, 0.1, 2000.0);
 
 	mvMatrix = makeLookAt( 0., -100., eyeZ,     0., -100., 0.,     0., 1., 0. );
 	
@@ -473,3 +502,4 @@ function rotate(x0, y0, x1, y1, speed){
 }
 
 document.getElementById("runButton").onclick = runProgram;
+setup();
