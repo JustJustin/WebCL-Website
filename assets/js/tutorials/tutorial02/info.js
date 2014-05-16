@@ -1,6 +1,6 @@
 var tutorial_data =
 {
-    name:"Vector Operations",
+    name:"Image Manipulation",
     steps:
     [
         {
