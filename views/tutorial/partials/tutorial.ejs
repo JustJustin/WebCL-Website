@@ -427,6 +427,9 @@ function tutorialStart()
             }
             if( lessonManager.nextStep ) {
                 lessonManager.step( lessonManager.nextStep );
+            } else { 
+                console.log("All steps completed");
+                alert("Lesson complete");
             }
         },
         setLock: function( b ) {
@@ -493,7 +496,9 @@ function tutorialStart()
     }
     
     if( num ) {
-        if( num == "2" ) {
+        if( num == "3" ) {
+            lessonManager.init( "/js/tutorials/tutorial03/info.js" );
+        } else if( num == "2" ) {
             lessonManager.init( "/js/tutorials/tutorial02/info.js" );
         } else if( num == "1" ||  num == "0") {
             lessonManager.init( "/js/tutorials/tutorial01/info.js" );
