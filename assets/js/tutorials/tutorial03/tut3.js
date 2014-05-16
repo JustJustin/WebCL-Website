@@ -31,11 +31,7 @@ var Y_MAX =  100;
 var Z_MIN = -100;
 var Z_MAX =  100;
 
-
 var horizAspect = 480.0/640.0;
-
-
-
 
 var eyeZ = 800.0;
 
@@ -47,6 +43,9 @@ var ctx;
 var program;
 var cmdQueue;
 var kernel;
+
+//global loop interval handle
+var clearThis = false;
 
 function run(){
 	animateScene();
@@ -74,33 +73,36 @@ function setup() {
 	initShaders();
 	
 	init();
-	
-	$("#glcanvas").addClass("webgl_hide");
 
 }
 
 function runProgram(){
 
-	$("#glcanvas").addClass("webgl_output").removeClass("webgl_hide");
-
 	resetParticles();
 	cmdQueue.finish();
+    
+    if( clearThis ) {
+        clearInterval( clearThis );
+        clearThis = false;
+        
+        $("#runButton").text("Run Program");
+        return;
+    }
+    $("#runButton").text("Stop Program");
 	
 
 	var counter = 0;
 	
 	var looper = setInterval(function(){
-		counter++
+		counter++;
 		run();
 		if(counter >= 750){
+            clearThis = false;
 			clearInterval(looper);
-			$("#glcanvas").addClass("webgl_hide").removeClass("webgl_output");
+            $("runButton").text("Run Program");
 		}
-	
 	}, 15);
-	
-	
-	
+    clearThis = looper;
 }
 
 
@@ -311,6 +313,11 @@ function init(){
 }
 
 function webcl_cleanup(){
+    if( clearThis ) {
+        clearInterval( clearThis );
+        clearThis = false;
+        $("runButton").text("Run Program");
+    }
 
 	kernel.release();
 	program.release();
